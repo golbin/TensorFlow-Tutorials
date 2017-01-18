@@ -25,7 +25,7 @@ TensorFlow 1.0 이 출시되면 Python 3.x 와 TensorFlow 1.0 으로 업데이�
 
 - [01 - Basic](./01 - TensorFlow Basic/01 - Basic.py)
   - 텐서플로우의 플레이스홀더와 변수, 연산의 개념과 그래프를 실행하는 방법을 익힙니다.
-- [02 - Linear Regression](./01 - TensorFlow Basic/01 - Linear Regression.py)
+- [02 - Linear Regression](./01 - TensorFlow Basic/02 - Linear Regression.py)
   - 단순한 선형 회귀 모형을 만들어봅니다.
 
 ### [02 - Neural Network Basic](./02 - Neural Network Basic)
@@ -54,11 +54,11 @@ TensorFlow 1.0 이 출시되면 Python 3.x 와 TensorFlow 1.0 으로 업데이�
 
 - [01 - Counting](./04 - ChatBot (RNN)/01 - Counting.py)
   - 자연어 처리나 음성 처리 분야에 많이 사용되는 RNN 의 기본적인 사용법을 익힙니다.
-- [02 - Dynamic RNN](./04 - ChatBot (RNN)02 - Dynamic RNN.py)
+- [02 - Dynamic RNN](./04 - ChatBot (RNN)/02 - Dynamic RNN.py)
   - 다중 레이어의 RNN 과 더 효율적인 RNN 학습을 위해 텐서플로우에서 제공하는 Dynamic RNN 을 사용해봅니다.
 - [03 - Seq2Seq](./04 - ChatBot (RNN)/03 - Seq2Seq.py)
   - 챗봇, 번역, 이미지 캡셔닝등에 사용되는 시퀀스 학습/생성 모델인 Seq2Seq 을 구현해봅니다.
-- [04 - Chatbot](./04 - ChatBot (RNN)/04 - Chatbot.py)
+- [04 - Chatbot](./04 - ChatBot (RNN)/04 - ChatBot)
   - Seq2Seq 모델을 이용해 간단한 챗봇을 만들어봅니다.
 
 ### [05 - Inception](./05 - Inception)
