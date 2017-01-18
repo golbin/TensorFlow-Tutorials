@@ -11,13 +11,13 @@
 - data/chat.log : 대화 데이터
 - data/chat.voc : 어휘 데이터
 
-#### 채팅해보기
+### 채팅해보기
 
 ```
 python chat.py
 ```
 
-#### 학습시키기
+### 학습시키기
 
 ``` 
 python train.py --train
@@ -31,7 +31,7 @@ python train.py --train
 tensorboard --logdir=./logs
 ```
 
-#### 테스트 해 보기
+### 테스트 해 보기
 
 모델이 작동하는지만 봅니다. 정확도는 신뢰할 수 없습니다.
 
@@ -39,7 +39,7 @@ tensorboard --logdir=./logs
 python train.py --test
 ```
 
-#### 어휘 데이터 생성하기
+### 어휘 데이터 생성하기
 
 토크나이저를 바꿨거나 새로운 데이터를 이용하기를 원하는 경우, 다음과 같은 방법으로 먼저 어휘 데이터를 생성해야 합니다.
 
