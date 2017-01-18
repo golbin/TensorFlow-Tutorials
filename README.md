@@ -69,6 +69,11 @@ TensorFlow 1.0 이 출시되면 Python 3.x 와 TensorFlow 1.0 으로 업데이�
 
 자세한 내용은 [05 - Inception/README.md](./05 - Inception/README.md) 설명을 참고 해 주세요.
 
+### TODO
+
+- [ ] 강화학습, DQN
+- [ ] GAN
+
 ## 참고
 
 조금 더 기초적인 이론에 대한 내용은 다음 강좌와 저장소를 참고하세요.
