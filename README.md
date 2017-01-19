@@ -39,7 +39,7 @@ TensorFlow 1.0 이 출시되면 Python 3.x 와 TensorFlow 1.0 으로 업데이�
 - [03 - TensorBoard](./02 - Neural Network Basic/03 - TensorBoard.py)
   - 텐서보드를 이용해 신경망의 구성과 손실값의 변화를 시각적으로 확인해봅니다.
 - [04 - Word2Vec](./02 - Neural Network Basic/04 - Word2Vec.py)
-  - 자연어 분석에 매주 중요하게 사용되는 Word2Vec 모델을 간단하게 구현해봅니다.
+  - 자연어 분석에 매우 중요하게 사용되는 Word2Vec 모델을 간단하게 구현해봅니다.
 
 ### [03 - MNIST (CNN, Autoencoder)](./03 - MNIST (CNN, Autoencoder))
 
