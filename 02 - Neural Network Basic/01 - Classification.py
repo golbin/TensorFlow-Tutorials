@@ -35,21 +35,28 @@ W2 = tf.Variable(tf.random_uniform([10, 3], -1., 1.))
 b1 = tf.Variable(tf.zeros([10]))
 b2 = tf.Variable(tf.zeros([3]))
 
-# 신경망에 가중치 W1과 편향 b1을 적용합니다.
+# 신경망의 히든 레이어에 가중치 W1과 편향 b1을 적용합니다
 L = tf.add(tf.matmul(X, W1), b1)
 # 가중치와 편향을 이용해 계산한 결과 값에
 # 텐서플로우에서 기본적으로 제공하는 활성화 함수인 ReLU 함수를 적용합니다.
 L = tf.nn.relu(L)
 
 # 최종적인 아웃풋을 계산합니다.
-# W2 와 b2 의 아웃풋 뉴런의 갯수가 3개이므로, 3개의 아웃풋을 만들어냅니다.
+# 히든레이어에 두번째 가중치 W2와 편향 b2를 적용하여 3개의 출력값을 만들어냅니다.
 model = tf.add(tf.matmul(L, W2), b2)
+# 마지막으로 softmax 함수를 이용하여 출력값을 사용하기 쉽게 만듭니다
+# softmax 함수는 다음처럼 결과값을 전체합이 1인 확률로 만들어주는 함수입니다.
+# 예) [8.04, 2.76, -6.52] -> [0.53 0.24 0.23]
+model = tf.nn.softmax(model)
 
 # 신경망을 최적화하기 위한 최적화 함수를 작성합니다.
-# 텐서플로우에서 기본적으로 제공되는 크로스 엔트로피 함수를 이용해
-# 복잡한 수식을 사용하지 않고도 비용 함수를 다음처럼 간단하게 적용할 수 있습니다.
-cost = tf.reduce_mean(
-        tf.nn.softmax_cross_entropy_with_logits(model, Y))
+# 각 개별 결과에 대한 합을 구한 뒤 평균을 내는 방식을 사용합니다.
+# 전체 합이 아닌, 개별 결과를 구한 뒤 평균을 내는 방식을 사용하기 위해 axis 옵션을 사용합니다.
+# axis 옵션이 없으면 -1.09 처럼 총합인 스칼라값으로 출력됩니다.
+#        Y         model         Y * tf.log(model)   reduce_sum(axis=1)
+# 예) [[1 0 0]  [[0.1 0.7 0.2]  -> [[-1.0  0    0]  -> [-1.0, -0.09]
+#     [0 1 0]]  [0.2 0.8 0.0]]     [ 0   -0.09 0]]
+cost = tf.reduce_mean(-tf.reduce_sum(Y * tf.log(model), axis=1))
 
 optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.01)
 train_op = optimizer.minimize(cost)

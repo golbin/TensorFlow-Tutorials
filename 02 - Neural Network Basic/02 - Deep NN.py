@@ -33,8 +33,12 @@ L1 = tf.nn.relu(tf.matmul(X, W1))
 L2 = tf.nn.relu(tf.matmul(L1, W2))
 
 # 마지막으로 아웃풋을 만들기 위해 W3 를 곱해줍니다.
+# 비용 함수에 텐서플로우가 제공하는 softmax_cross_entropy_with_logits 함수를 사용하면,
+# 출력값에 먼저 softmax 함수를 적용할 필요가 없습니다.
 model = tf.matmul(L2, W3)
 
+# 텐서플로우에서 기본적으로 제공되는 크로스 엔트로피 함수를 이용해
+# 복잡한 수식을 사용하지 않고도 최적화를 위한 비용 함수를 다음처럼 간단하게 적용할 수 있습니다.
 cost = tf.reduce_mean(
         tf.nn.softmax_cross_entropy_with_logits(model, Y))
 
