@@ -14,8 +14,10 @@
 
 ## 요구사항
 
-- Python 2.7
 - TensorFlow 0.12
+- Python 2.7
+    - numpy 1.11
+    - mathplot 1.5
 
 TensorFlow 1.0 이 출시되면 Python 3.x 와 TensorFlow 1.0 으로 업데이트 할 예정입니다.
 
