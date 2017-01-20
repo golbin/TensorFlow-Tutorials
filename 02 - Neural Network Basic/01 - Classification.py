@@ -49,13 +49,15 @@ model = tf.add(tf.matmul(L, W2), b2)
 # 예) [8.04, 2.76, -6.52] -> [0.53 0.24 0.23]
 model = tf.nn.softmax(model)
 
-# 신경망을 최적화하기 위한 최적화 함수를 작성합니다.
+# 신경망을 최적화하기 위한 비용 함수를 작성합니다.
 # 각 개별 결과에 대한 합을 구한 뒤 평균을 내는 방식을 사용합니다.
 # 전체 합이 아닌, 개별 결과를 구한 뒤 평균을 내는 방식을 사용하기 위해 axis 옵션을 사용합니다.
 # axis 옵션이 없으면 -1.09 처럼 총합인 스칼라값으로 출력됩니다.
 #        Y         model         Y * tf.log(model)   reduce_sum(axis=1)
 # 예) [[1 0 0]  [[0.1 0.7 0.2]  -> [[-1.0  0    0]  -> [-1.0, -0.09]
 #     [0 1 0]]  [0.2 0.8 0.0]]     [ 0   -0.09 0]]
+# 즉, 이것은 예측값과 실제값 사이의 확률 분포의 차이를 비용으로 계산한 것이며,
+# 이것을 Cross-Entropy 라고 합니다.
 cost = tf.reduce_mean(-tf.reduce_sum(Y * tf.log(model), axis=1))
 
 optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.01)
