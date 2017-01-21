@@ -19,26 +19,17 @@
 게임 구현을 위한 다양한 내용들이 들어있어 코드분량이 꽤 많지만, 핵심 내용은 딱 다음과 같습니다.
 
 1. Q_value 를 이용해 얻어온 액션을 수행하고, 해당 액션에 의한 게임의 상태와 리워드를 획득한 뒤, 이것을 메모리에 순차적으로 쌓아둡니다.
-2. 일정 수준 이상의 메모리가 쌓이면, 메모리에 저장된 것들 중 샘플링을 하여 논문의 다음 수식을 이용해 최적화를 수행합니다.
-
-```
-Set y_j =
-    if episode is terminates at step j+1 then r_j
-    otherwise r_j + γ*max_a'Q(ð_(j+1),a';θ')
-With respect to the network parameters θ
-    Perform a gradient descent step on (y_j-Q(ð_j,a_j;θ))^2
-Every C steps reset Q^ = Q
-```
-
-위 내용을 구현한 코드는 model.py 파일의 아래의 내용과 같습니다.
+2. 일정 수준 이상의 메모리가 쌓이면, 메모리에 저장된 것들 중 샘플링을 하여 논문의 수식을 이용해 다음처럼 최적화를 수행합니다.
 
 ```python
-# model.py
+# model.py 내용을 간소하게 재구성했습니다.
 
 def build_model(self):
     L1 = tf.nn.relu(tf.matmul(state, W1) + b1)
     Q_value = tf.matmul(L2, W3) + b3
 
+    # DQN 의 손실 함수를 구성하는 부분입니다. 다음 수식을 참고하세요.
+    # Perform a gradient descent step on (y_j-Q(ð_j,a_j;θ))^2
     Q_action = tf.reduce_sum(tf.mul(Q_value, self.input_action), axis=1)
     cost = tf.reduce_mean(tf.square(self.input_Y - Q_action))
     train_op = tf.train.AdamOptimizer(1e-6).minimize(cost, global_step=self.global_step)
@@ -46,8 +37,11 @@ def build_model(self):
 def train(self):
     Q_value = self.Q_value.eval(feed_dict={self.input_state: next_state})
 
+    # DQN 의 손실 함수에 사용할 핵심적인 값을 계산하는 부분입니다. 다음 수식을 참고하세요.
+    # if episode is terminates at step j+1 then r_j
+    # otherwise r_j + γ*max_a'Q(ð_(j+1),a';θ')
     for i in range(0, self.BATCH_SIZE):
-        if minibatch[i][4]:  # if episode is terminates
+        if minibatch[i][4]:
             Y.append(reward[i])
         else:
             Y.append(reward[i] + self.GAMMA * np.max(Q_value[i]))
