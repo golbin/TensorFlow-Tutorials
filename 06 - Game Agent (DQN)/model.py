@@ -12,7 +12,7 @@ from collections import deque
 class DQN:
 
     # 다음에 취할 액션을 DQN 을 이용해 결정할 시기를 결정합니다.
-    # get_action 참고
+    # get_action 함수 참고
     INITIAL_EPSILON = 1.0
     FINAL_EPSILON = 0.01
     EXPLORE = 1000.
@@ -44,7 +44,7 @@ class DQN:
         self.input_state = tf.placeholder(tf.float32, [None, len(self.state_t), self.n_width * self.n_height])
         # 각각의 상태를 만들어낸 액션의 값들입니다.
         self.input_action = tf.placeholder(tf.float32, [None, self.n_action])
-        # DQN 의 가장 핵심적인 값이며 Q_action 을 사용하는데 계산할 값 입니다. train 함수를 참고하세요.
+        # DQN 의 가장 핵심적인 값이며 Q_action 을 계산하는데 사용할 값 입니다. train 함수를 참고하세요.
         self.input_Y = tf.placeholder(tf.float32, [None])
 
         self.global_step = tf.Variable(0, trainable=False, name="global_step")
