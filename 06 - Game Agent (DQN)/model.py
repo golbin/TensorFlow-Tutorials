@@ -80,7 +80,7 @@ class DQN:
             self.saver.save(self.session, 'model/dqn.ckpt', global_step=self.time_step)
 
     def build_model(self):
-        # 계산 속도와 편의성을 위해 CNN 을 사용하지 않고, input_state 값을 flat 을 만들어 계산합니다.
+        # 계산 속도와 편의성을 위해 CNN 을 사용하지 않고, input_state 값을 flat 하게 만들어 계산합니다.
         n_input = len(self.state_t) * self.n_width * self.n_height
         state = tf.reshape(self.input_state, [-1, n_input])
 
