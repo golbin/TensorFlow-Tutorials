@@ -99,12 +99,11 @@ print '최적화 완료!'
 # 입력값(위쪽)과 모델이 생성한 값(아래쪽)을 시각적으로 비교해봅니다.
 ######
 sample_size = 10
-sample_xs = random.sample(mnist.test.images, sample_size)
 
 predicted_samples = sess.run(prediction,
                              feed_dict={X: mnist.test.images[:sample_size]})
 
-fig, ax = plt.subplots(2, 10, figsize=(10, 2))
+fig, ax = plt.subplots(2, sample_size, figsize=(sample_size, 2))
 
 for i in range(sample_size):
     ax[0][i].set_axis_off()
