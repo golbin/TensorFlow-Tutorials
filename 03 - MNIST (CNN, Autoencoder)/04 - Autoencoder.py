@@ -25,7 +25,7 @@ n_input = 28*28   # 입력값 크기 - 이미지 픽셀수
 # 신경망 모델 구성
 ######
 # Y 가 없습니다. 입력값을 Y로 사용하기 때문입니다.
-X = tf.placeholder("float", [None, n_input])
+X = tf.placeholder(tf.float32, [None, n_input])
 
 # 인코더 레이어와 디코더 레이어의 가중치와 편향 변수를 설정합니다.
 # 다음과 같이 이어지는 레이어를 구성하기 위한 값들 입니다.
