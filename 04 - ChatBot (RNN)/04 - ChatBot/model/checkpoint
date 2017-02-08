@@ -1,2 +1,0 @@
-model_checkpoint_path: "conversation.ckpt-5000"
-all_model_checkpoint_paths: "conversation.ckpt-5000"
