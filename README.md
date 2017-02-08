@@ -41,27 +41,23 @@ TensorFlow 1.0 이 출시되면 Python 3.x 와 TensorFlow 1.0 으로 업데이�
 - [04 - Word2Vec](./02 - Neural Network Basic/04 - Word2Vec.py)
   - 자연어 분석에 매우 중요하게 사용되는 Word2Vec 모델을 간단하게 구현해봅니다.
 
-### [03 - MNIST (CNN, Autoencoder)](./03 - MNIST (CNN, Autoencoder))
+### [03 - MNIST, CNN](./03 - MNIST, CNN)
 
-- [01 - MNIST](./03 - MNIST (CNN, Autoencoder)/01 - MNIST.py)
+- [01 - MNIST](./03 - MNIST, CNN/01 - MNIST.py)
   - 머신러닝 학습의 Hello World 와 같은 MNIST(손글씨 숫자 인식) 문제를 신경망으로 풀어봅니다.
-- [02 - Dropout](./03 - MNIST (CNN, Autoencoder)/02 - Dropout.py)
+- [02 - Dropout](./03 - MNIST, CNN/02 - Dropout.py)
   - 과적합 방지를 위해 많이 사용되는 Dropout 기법을 사용해봅니다.
-- [03 - CNN](./03 - MNIST (CNN, Autoencoder)/03 - CNN.py)
+- [03 - CNN](./03 - MNIST, CNN/03 - CNN.py)
   - 이미지 처리 분야에서 가장 유명한 신경망 모델인 CNN 을 이용하여 더 높은 인식률을 만들어봅니다.
-- [04 - Autoencoder](./03 - MNIST (CNN, Autoencoder)/04 - Autoencoder.py)
+
+### [04 - Autoencoder, GAN](./04 - Autoencoder, GAN)
+
+- [01 - Autoencoder](./04 - Autoencoder, GAN/01 - Autoencoder.py)
   - 대표적인 비감독(Unsupervised) 학습 방법인 Autoencoder 를 사용해봅니다.
-
-### [04 - ChatBot (RNN)](./04 - ChatBot (RNN))
-
-- [01 - Counting](./04 - ChatBot (RNN)/01 - Counting.py)
-  - 자연어 처리나 음성 처리 분야에 많이 사용되는 RNN 의 기본적인 사용법을 익힙니다.
-- [02 - Dynamic RNN](./04 - ChatBot (RNN)/02 - Dynamic RNN.py)
-  - 다중 레이어의 RNN 과 더 효율적인 RNN 학습을 위해 텐서플로우에서 제공하는 Dynamic RNN 을 사용해봅니다.
-- [03 - Seq2Seq](./04 - ChatBot (RNN)/03 - Seq2Seq.py)
-  - 챗봇, 번역, 이미지 캡셔닝등에 사용되는 시퀀스 학습/생성 모델인 Seq2Seq 을 구현해봅니다.
-- [04 - Chatbot](./04 - ChatBot (RNN)/04 - ChatBot)
-  - Seq2Seq 모델을 이용해 간단한 챗봇을 만들어봅니다.
+- [02 - GAN](./04 - Autoencoder, GAN/02 - GAN.py)
+  - 2016년에 가장 관심을 많이 받았던 비감독 학습 방법인 GAN 을 구현해봅니다.
+- [03 - GAN #2](./04 - Autoencoder, GAN/03 - GAN#2.py)
+  - GAN 을 응용하여 원하는 숫자의 손글씨 이미지를 생성하는 모델을 만들어봅니다. 이런 방식으로 흑백 사진을 컬러로 만든다든가, 또는 선화를 채색한다든가 하는 응용이 가능합니다.
 
 ### [05 - Inception](./05 - Inception)
 
@@ -71,17 +67,29 @@ TensorFlow 1.0 이 출시되면 Python 3.x 와 TensorFlow 1.0 으로 업데이�
 
 자세한 내용은 [05 - Inception/README.md](./05 - Inception/README.md) 문서를 참고 해 주세요.
 
-### [06 - Game Agent (DQN)](./06 - Game Agent (DQN))
+### [06 - RNN, ChatBot](./06 - RNN, ChatBot)
+
+- [01 - Counting](./06 - RNN, ChatBot/01 - Counting.py)
+  - 자연어 처리나 음성 처리 분야에 많이 사용되는 RNN 의 기본적인 사용법을 익힙니다.
+- [02 - Dynamic RNN](./06 - RNN, ChatBot/02 - Dynamic RNN.py)
+  - 다중 레이어의 RNN 과 더 효율적인 RNN 학습을 위해 텐서플로우에서 제공하는 Dynamic RNN 을 사용해봅니다.
+- [03 - Seq2Seq](./06 - RNN, ChatBot/03 - Seq2Seq.py)
+  - 챗봇, 번역, 이미지 캡셔닝등에 사용되는 시퀀스 학습/생성 모델인 Seq2Seq 을 구현해봅니다.
+- [04 - Chatbot](./06 - RNN, ChatBot/04 - ChatBot)
+  - Seq2Seq 모델을 이용해 간단한 챗봇을 만들어봅니다.
+
+### [07 - DQN](./07 - DQN)
 
 알파고로 유명한 구글의 딥마인드에서 개발한 딥러닝을 이용한 강화학습인 DQN 을 구현해봅니다.
 
 조금 복잡해보이지만, 핵심적인 부분을 최대한 분리해두었으니 충분히 따라가실 수 있을 것 입니다.
 
-자세한 내용은 [06 - Game Agent (DQN)/README.md](./06 - Game Agent (DQN)/README.md) 문서를 참고 해 주세요.
+자세한 내용은 [07 - DQN/README.md](./07 - DQN/README.md) 문서를 참고 해 주세요.
 
 ### TODO
 
-- [ ] GAN
+- [ ] TensorFlow 1.0 업데이트
+- [ ] Python 3.x 업데이트
 
 ## 참고
 
