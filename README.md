@@ -58,7 +58,7 @@ TensorFlow 1.0 이 출시되면 Python 3.x 와 TensorFlow 1.0 으로 업데이�
   - 대표적인 비감독(Unsupervised) 학습 방법인 Autoencoder 를 사용해봅니다.
 - [02 - GAN](./04 - Autoencoder, GAN/02 - GAN.py)
   - 2016년에 가장 관심을 많이 받았던 비감독 학습 방법인 GAN 을 구현해봅니다.
-- [03 - GAN #2](./04 - Autoencoder, GAN/03 - GAN#2.py)
+- [03 - GAN #2](./04 - Autoencoder, GAN/03 - GAN2.py)
   - GAN 을 응용하여 원하는 숫자의 손글씨 이미지를 생성하는 모델을 만들어봅니다. 이런 방식으로 흑백 사진을 컬러로 만든다든가, 또는 선화를 채색한다든가 하는 응용이 가능합니다.
 
 ### [05 - Inception](./05 - Inception)

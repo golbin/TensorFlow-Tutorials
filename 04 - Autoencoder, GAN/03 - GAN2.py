@@ -126,7 +126,7 @@ for epoch in range(total_epoch):
                 ax[0+(j*2)][i].imshow(np.reshape(mnist.validation.images[i+(j*n_class)], (28, 28)))
                 ax[1+(j*2)][i].imshow(np.reshape(samples[i+(j*n_class)], (28, 28)))
 
-        plt.savefig('samples#2/{}.png'.format(str(epoch).zfill(3)), bbox_inches='tight')
+        plt.savefig('samples2/{}.png'.format(str(epoch).zfill(3)), bbox_inches='tight')
         plt.close(fig)
 
 
