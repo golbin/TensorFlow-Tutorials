@@ -49,6 +49,8 @@ TensorFlow 1.0 이 출시되면 Python 3.x 와 TensorFlow 1.0 으로 업데이�
   - 과적합 방지를 위해 많이 사용되는 Dropout 기법을 사용해봅니다.
 - [03 - CNN](./03 - MNIST, CNN/03 - CNN.py)
   - 이미지 처리 분야에서 가장 유명한 신경망 모델인 CNN 을 이용하여 더 높은 인식률을 만들어봅니다.
+- [03 - CNN](./03 - MNIST, CNN/04 - tf.contrib.layers.py)
+  - 신경망 구성을 손쉽게 해 주는 유틸리티 모음인 tensorflow.contrib.layers 를 사용해봅니다.
 
 ### [04 - Autoencoder, GAN](./04 - Autoencoder, GAN)
 
