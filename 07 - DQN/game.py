@@ -13,9 +13,9 @@ class Game:
         self.screen_width = screen_width
         self.screen_height = screen_height
         # 도로의 크기는 스크린의 반으로 정하며, 도로의 좌측 우측의 여백을 계산해둡니다.
-        self.road_width = (screen_width / 2)
-        self.road_left = self.road_width / 2 + 1
-        self.road_right = self.road_left + self.road_width - 1
+        self.road_width = int(screen_width / 2)
+        self.road_left = int(self.road_width / 2 + 1)
+        self.road_right = int(self.road_left + self.road_width - 1)
 
         # 자동차와 장애물의 초기 위치와, 장애물 각각의 속도를 정합니다.
         self.car = {"col": 0, "row": 2}

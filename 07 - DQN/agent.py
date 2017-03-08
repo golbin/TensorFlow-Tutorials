@@ -27,8 +27,8 @@ def main(_):
         game.reset()
         gameover = FLAGS.train
 
-        print " Avg. Reward: %d, Total Game: %d" % (
-                    game.total_reward / game.total_game, game.total_game)
+        print (" Avg. Reward: %d, Total Game: %d" % (
+                    game.total_reward / game.total_game, game.total_game))
 
         while not gameover:
             # DQN 모델을 이용해 실행할 액션을 결정합니다.
