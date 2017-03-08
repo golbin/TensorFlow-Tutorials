@@ -15,12 +15,12 @@ class DQN:
     # get_action 함수 참고
     INITIAL_EPSILON = 1.0
     FINAL_EPSILON = 0.01
-    EXPLORE = 10.
+    EXPLORE = 1000.
     # 학습 데이터를 어느정도 쌓은 후, 일정 시간 이후에 학습을 시작하도록 합니다.
-    OBSERVE = 1.
+    OBSERVE = 100.
     # 학습에 사용할 플레이결과를 얼마나 많이 저장해서 사용할지를 정합니다.
     # (플레이결과 = 게임판의 상태 + 취한 액션 + 리워드 + 종료여부)
-    REPLAY_MEMORY = 500
+    REPLAY_MEMORY = 50000
     # 학습시 사용/계산할 상태값(정확히는 replay memory)의 갯수를 정합니다.
     BATCH_SIZE = 5
     # 과거의 상태에 대한 가중치를 줄이는 역할을 합니다.
