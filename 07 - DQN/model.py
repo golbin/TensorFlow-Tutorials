@@ -63,10 +63,10 @@ class DQN:
 
         ckpt = tf.train.get_checkpoint_state('model')
         if ckpt and tf.train.checkpoint_exists(ckpt.model_checkpoint_path):
-            print "다음 파일에서 모델을 읽는 중 입니다..", ckpt.model_checkpoint_path
+            print ("다음 파일에서 모델을 읽는 중 입니다..", ckpt.model_checkpoint_path)
             saver.restore(session, ckpt.model_checkpoint_path)
         else:
-            print "새로운 모델을 생성하는 중 입니다."
+            print ("새로운 모델을 생성하는 중 입니다.")
             session.run(tf.global_variables_initializer())
 
         return saver, session
