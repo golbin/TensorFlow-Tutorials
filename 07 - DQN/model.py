@@ -15,14 +15,14 @@ class DQN:
     # get_action 함수 참고
     INITIAL_EPSILON = 1.0
     FINAL_EPSILON = 0.01
-    EXPLORE = 1000.
+    EXPLORE = 10.
     # 학습 데이터를 어느정도 쌓은 후, 일정 시간 이후에 학습을 시작하도록 합니다.
-    OBSERVE = 100.
+    OBSERVE = 1.
     # 학습에 사용할 플레이결과를 얼마나 많이 저장해서 사용할지를 정합니다.
     # (플레이결과 = 게임판의 상태 + 취한 액션 + 리워드 + 종료여부)
-    REPLAY_MEMORY = 50000
+    REPLAY_MEMORY = 500
     # 학습시 사용/계산할 상태값(정확히는 replay memory)의 갯수를 정합니다.
-    BATCH_SIZE = 50
+    BATCH_SIZE = 5
     # 과거의 상태에 대한 가중치를 줄이는 역할을 합니다.
     GAMMA = 0.99
 
@@ -98,7 +98,7 @@ class DQN:
 
         # DQN 의 손실 함수를 구성하는 부분입니다. 다음 수식을 참고하세요.
         # Perform a gradient descent step on (y_j-Q(ð_j,a_j;θ))^2
-        Q_action = tf.reduce_sum(tf.mul(Q_value, self.input_action), axis=1)
+        Q_action = tf.reduce_sum(tf.multiply(Q_value, self.input_action), axis=1)
         cost = tf.reduce_mean(tf.square(self.input_Y - Q_action))
         train_op = tf.train.AdamOptimizer(1e-6).minimize(cost, global_step=self.global_step)
 
@@ -159,7 +159,7 @@ class DQN:
         # 학습 초기에는 액션을 랜덤한 값으로 결정합니다.
         # 이후 학습을 진행하면서 점진적으로 더 많은 결정을 DQN 이 하도록 합니다.
         if train and random.random() <= self.epsilon:
-            index = random.randrange(self.n_action)
+            index = random.randint(self.n_action)
         else:
             Q_value = self.Q_value.eval(feed_dict={self.input_state: [self.state_t]})[0]
             index = np.argmax(Q_value)
