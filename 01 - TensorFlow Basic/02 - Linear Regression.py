@@ -16,7 +16,7 @@ Y = tf.placeholder(tf.float32, name="Y")
 # X 와 Y 의 상관 관계를 분석하기 위한 가설 수식을 작성합니다.
 # h = W * X + b
 # W 와 X 가 행열이 아니므로 tf.matmul 이 아니라 tf.mul 을 사용했습니다.
-hypothesis = tf.add(tf.mul(W, X), b)
+hypothesis = tf.add(tf.multiply(W, X), b)
 
 # 손실 함수를 작성합니다.
 # mean(h - Y)^2 : 예측값과 실제값의 거리를 비용(손실) 함수로 정합니다.
