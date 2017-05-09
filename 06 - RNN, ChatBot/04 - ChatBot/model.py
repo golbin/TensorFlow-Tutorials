@@ -38,24 +38,24 @@ class Seq2Seq:
         enc_cell, dec_cell = self.build_cells()
 
         with tf.variable_scope('encode'):
-            outputs, enc_states = tf.nn.dynamic_rnn(enc_cell, self.enc_input, dtype=tf.float32)
+            outputs, enc_states = tf.nn.dynamic_rnn(enc_cell, self.enc_input, dtype=tf.float32, time_major=False)
 
         with tf.variable_scope('decode'):
             outputs, dec_states = tf.nn.dynamic_rnn(dec_cell, self.dec_input, dtype=tf.float32,
-                                                    initial_state=enc_states)
+                                                    initial_state=enc_states, time_major=False)
 
         self.logits, self.cost, self.train_op = self.build_ops(outputs, self.targets)
 
         self.outputs = tf.argmax(self.logits, 2)
 
-    def build_cells(self, output_keep_prob=0.5):
-        enc_cell = tf.nn.rnn_cell.BasicRNNCell(self.n_hidden)
-        enc_cell = tf.nn.rnn_cell.DropoutWrapper(enc_cell, output_keep_prob=output_keep_prob)
-        enc_cell = tf.nn.rnn_cell.MultiRNNCell([enc_cell] * self.n_layers)
+    def cell(self, n_hidden, output_keep_prob):
+        rnn_cell = tf.contrib.rnn.BasicRNNCell(n_hidden)
+        rnn_cell = tf.contrib.rnn.DropoutWrapper(rnn_cell, output_keep_prob=output_keep_prob)
+        return rnn_cell
 
-        dec_cell = tf.nn.rnn_cell.BasicRNNCell(self.n_hidden)
-        dec_cell = tf.nn.rnn_cell.DropoutWrapper(dec_cell, output_keep_prob=output_keep_prob)
-        dec_cell = tf.nn.rnn_cell.MultiRNNCell([dec_cell] * self.n_layers)
+    def build_cells(self, output_keep_prob=0.5):
+        enc_cell = tf.contrib.rnn.MultiRNNCell([self.cell(self.n_hidden, output_keep_prob) for _ in range(self.n_layers)])
+        dec_cell = tf.contrib.rnn.MultiRNNCell([self.cell(self.n_hidden, output_keep_prob) for _ in range(self.n_layers)])
 
         return enc_cell, dec_cell
 
@@ -66,7 +66,7 @@ class Seq2Seq:
         logits = tf.matmul(outputs, self.weights) + self.bias
         logits = tf.reshape(logits, [-1, time_steps, self.vocab_size])
 
-        cost = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits, targets))
+        cost = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=targets, logits=logits))
         train_op = tf.train.AdamOptimizer(learning_rate=self.learning_late).minimize(cost, global_step=self.global_step)
 
         tf.summary.scalar('cost', cost)

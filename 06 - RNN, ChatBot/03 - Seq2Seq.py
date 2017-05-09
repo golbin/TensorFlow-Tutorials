@@ -69,20 +69,25 @@ b = tf.Variable(tf.zeros([n_classes]))
 enc_input = tf.transpose(enc_input, [1, 0, 2])
 dec_input = tf.transpose(dec_input, [1, 0, 2])
 
+def cell():
+    rnn_cell = tf.contrib.rnn.BasicRNNCell(n_hidden)
+    rnn_cell = tf.contrib.rnn.DropoutWrapper(rnn_cell, output_keep_prob=0.5)
+    return rnn_cell
+
 # 인코더 셀을 구성한다.
 with tf.variable_scope('encode'):
-    enc_cell = tf.nn.rnn_cell.BasicRNNCell(n_hidden)
-    enc_cell = tf.nn.rnn_cell.DropoutWrapper(enc_cell, output_keep_prob=0.5)
-    enc_cell = tf.nn.rnn_cell.MultiRNNCell([enc_cell] * n_layers)
+    # enc_cell = tf.contrib.rnn.BasicRNNCell(n_hidden)
+    # enc_cell = tf.contrib.rnn.DropoutWrapper(enc_cell, output_keep_prob=0.5)
+    enc_cell = tf.contrib.rnn.MultiRNNCell([cell() for _ in range(n_layers)])
 
     outputs, enc_states = tf.nn.dynamic_rnn(enc_cell, enc_input,
                                             dtype=tf.float32)
 
 # 디코더 셀을 구성한다.
 with tf.variable_scope('decode'):
-    dec_cell = tf.nn.rnn_cell.BasicRNNCell(n_hidden)
-    dec_cell = tf.nn.rnn_cell.DropoutWrapper(dec_cell, output_keep_prob=0.5)
-    dec_cell = tf.nn.rnn_cell.MultiRNNCell([dec_cell] * n_layers)
+    # dec_cell = tf.contrib.rnn.BasicRNNCell(n_hidden)
+    # dec_cell = tf.contrib.rnn.DropoutWrapper(dec_cell, output_keep_prob=0.5)
+    dec_cell = tf.contrib.rnn.MultiRNNCell([cell() for _ in range(n_layers)])
 
     # Seq2Seq 모델은 인코더 셀의 최종 상태값을
     # 디코더 셀의 초기 상태값으로 넣어주는 것이 핵심.
@@ -103,7 +108,7 @@ logits = tf.matmul(outputs_trans, W) + b
 logits = tf.reshape(logits, [-1, time_steps, n_classes])
 
 
-cost = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits, targets))
+cost = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=targets, logits=logits))
 train_op = tf.train.AdamOptimizer(learning_rate=0.01).minimize(cost)
 
 
@@ -122,11 +127,11 @@ for epoch in range(100):
     _, loss3 = sess.run([train_op, cost],
                         feed_dict={enc_input: x_batch2, dec_input: y_batch2, targets: target_batch2})
 
-    print 'Epoch:', '%04d' % (epoch + 1), 'cost =', \
+    print ('Epoch:', '%04d' % (epoch + 1), 'cost =', \
         'bucket[4] =', '{:.6f}'.format(loss4), \
-        'bucket[3] =', '{:.6f}'.format(loss3)
+        'bucket[3] =', '{:.6f}'.format(loss3))
 
-print '최적화 완료!'
+print ('최적화 완료!')
 
 
 #########
@@ -143,11 +148,11 @@ def prediction_test(seq_data):
                                                       dec_input: y_batch_t,
                                                       targets: target_batch_t})
 
-    print "\n=== 예측 결과 ==="
-    print '순차열:', seq_data
-    print '실제값:', [[num_arr[j] for j in dec] for dec in real]
-    print '예측값:', [[num_arr[i] for i in dec] for dec in predict]
-    print '정확도:', accuracy_val
+    print ("\n=== 예측 결과 ===")
+    print ('순차열:', seq_data)
+    print ('실제값:', [[num_arr[j] for j in dec] for dec in real])
+    print ('예측값:', [[num_arr[i] for i in dec] for dec in predict])
+    print ('정확도:', accuracy_val)
 
 
 # 학습 데이터에 있던 시퀀스로 테스트
@@ -193,24 +198,24 @@ def decode_loop(seq_data):
     return decode_seq
 
 
-print "\n=== 한글자씩 점진적으로 시퀀스를 예측 ==="
+print ("\n=== 한글자씩 점진적으로 시퀀스를 예측 ===")
 
 seq_data = ['123', '']
-print "123 ->", decode_loop(seq_data)
+print ("123 ->", decode_loop(seq_data))
 
 seq_data = ['67', '']
-print "67 ->", decode_loop(seq_data)
+print ("67 ->", decode_loop(seq_data))
 
 seq_data = ['3456', '']
-print "3456 ->", decode_loop(seq_data)
+print ("3456 ->", decode_loop(seq_data))
 
-print "\n=== 전체 시퀀스를 한 번에 예측 ==="
+print ("\n=== 전체 시퀀스를 한 번에 예측 ===")
 
 seq_data = ['123', 'PPP']
-print "123 ->", decode(seq_data)
+print ("123 ->", decode(seq_data))
 
 seq_data = ['67', 'PP']
-print "67 ->", decode(seq_data)
+print ("67 ->", decode(seq_data))
 
 seq_data = ['3456', 'PPPP']
-print "3456 ->", decode(seq_data)
+print ("3456 ->", decode(seq_data))

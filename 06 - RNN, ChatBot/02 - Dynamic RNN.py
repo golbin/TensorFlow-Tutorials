@@ -61,10 +61,13 @@ X_t = tf.transpose(X, [1, 0, 2])
 
 # RNN 셀을 생성합니다.
 # 다중 레이어와 과적합 방지를 위한 Dropout 기법을 사용합니다.
-cell = tf.nn.rnn_cell.BasicRNNCell(n_hidden)
-cell = tf.nn.rnn_cell.DropoutWrapper(cell, output_keep_prob=0.5)
+def cell():
+    rnn_cell = tf.contrib.rnn.BasicRNNCell(n_hidden)
+    rnn_cell = tf.contrib.rnn.DropoutWrapper(rnn_cell, output_keep_prob=0.5)
+    return rnn_cell
+
 # 다중 레이어 구성을 다음과 같이 아주 간단하게 만들 수 있습니다.
-cell = tf.nn.rnn_cell.MultiRNNCell([cell] * n_layers)
+cell = tf.contrib.rnn.MultiRNNCell([cell() for _ in range(n_layers)])
 
 # tf.nn.dynamic_rnn 함수를 이용해 순환 신경망을 만듭니다.
 outputs, states = tf.nn.dynamic_rnn(cell, X_t, dtype=tf.float32, time_major=True)
@@ -78,7 +81,7 @@ labels = tf.reshape(Y, [-1])
 
 
 cost = tf.reduce_mean(
-            tf.nn.sparse_softmax_cross_entropy_with_logits(logits, labels))
+            tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=logits))
 
 train_op = tf.train.RMSPropOptimizer(learning_rate=0.01).minimize(cost)
 
@@ -96,11 +99,11 @@ for epoch in range(30):
     _, loss4 = sess.run([train_op, cost], feed_dict={X: x_batch, Y: y_batch})
     _, loss3 = sess.run([train_op, cost], feed_dict={X: x_batch2, Y: y_batch2})
 
-    print 'Epoch:', '%04d' % (epoch + 1), 'cost =', \
+    print ('Epoch:', '%04d' % (epoch + 1), 'cost =', \
         'bucket[4] =', '{:.6f}'.format(loss4), \
-        'bucket[3] =', '{:.6f}'.format(loss3)
+        'bucket[3] =', '{:.6f}'.format(loss3))
 
-print '최적화 완료!'
+print ('최적화 완료!')
 
 
 #########
@@ -116,11 +119,11 @@ def prediction(seq_data):
     real, predict, accuracy_val = sess.run([labels, prediction, accuracy],
                                            feed_dict={X: x_batch_t, Y: y_batch_t})
 
-    print "\n=== 예측 결과 ==="
-    print '순차열:', seq_data
-    print '실제값:', [num_arr[i] for i in real]
-    print '예측값:', [num_arr[i] for i in predict]
-    print '정확도:', accuracy_val
+    print ("\n=== 예측 결과 ===")
+    print ('순차열:', seq_data)
+    print ('실제값:', [num_arr[i] for i in real])
+    print ('예측값:', [num_arr[i] for i in predict])
+    print ('정확도:', accuracy_val)
 
 
 # 학습 데이터에 있던 시퀀스로 테스트

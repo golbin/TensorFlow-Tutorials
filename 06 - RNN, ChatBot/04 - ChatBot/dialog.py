@@ -4,6 +4,7 @@
 import tensorflow as tf
 import numpy as np
 import re
+import codecs
 
 from config import FLAGS
 
@@ -152,7 +153,7 @@ class Dialog():
     def load_examples(self, data_path):
         self.examples = []
 
-        with open(data_path, 'r') as content_file:
+        with open(data_path, 'r', encoding='utf-8') as content_file:
             for line in content_file:
                 tokens = self.tokenizer(line.strip())
                 ids = self.tokens_to_ids(tokens)
@@ -161,7 +162,8 @@ class Dialog():
     def tokenizer(self, sentence):
         # 공백으로 나누고 특수문자는 따로 뽑아낸다.
         words = []
-        _TOKEN_RE_ = re.compile(b"([.,!?\"':;)(])")
+        # _TOKEN_RE_ = re.compile(b"([.,!?\"':;)(])")
+        _TOKEN_RE_ = re.compile("([.,!?\"':;)(])")
 
         for fragment in sentence.strip().split():
             words.extend(_TOKEN_RE_.split(fragment))
@@ -181,7 +183,7 @@ class Dialog():
     def load_vocab(self, vocab_path):
         self.vocab_list = self._PRE_DEFINED_ + []
 
-        with open(vocab_path, 'r') as vocab_file:
+        with open(vocab_path, 'r', encoding='utf-8') as vocab_file:
             for line in vocab_file:
                 self.vocab_list.append(line.strip())
 
@@ -194,22 +196,22 @@ def main(_):
     dialog = Dialog()
 
     if FLAGS.data_path and FLAGS.voc_test:
-        print "다음 데이터로 어휘 사전을 테스트합니다.", FLAGS.data_path
+        print ("다음 데이터로 어휘 사전을 테스트합니다.", FLAGS.data_path)
         dialog.load_vocab(FLAGS.voc_path)
         dialog.load_examples(FLAGS.data_path)
 
         enc, dec, target = dialog.next_batch(10)
-        print target
+        print (target)
         enc, dec, target = dialog.next_batch(10)
-        print target
+        print (target)
 
     elif FLAGS.data_path and FLAGS.voc_build:
-        print "다음 데이터에서 어휘 사전을 생성합니다.", FLAGS.data_path
+        print ("다음 데이터에서 어휘 사전을 생성합니다.", FLAGS.data_path)
         dialog.build_vocab(FLAGS.data_path, FLAGS.voc_path)
 
     elif FLAGS.voc_test:
         dialog.load_vocab(FLAGS.voc_path)
-        print dialog.vocab_dict
+        print (dialog.vocab_dict)
 
 
 if __name__ == "__main__":
