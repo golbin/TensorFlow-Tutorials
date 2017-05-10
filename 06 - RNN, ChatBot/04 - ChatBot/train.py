@@ -17,11 +17,14 @@ def train(dialog, batch_size=100, epoch=100):
         # TODO: 세션을 로드하고 로그를 위한 summary 저장등의 로직을 Seq2Seq 모델로 넣을 필요가 있음
         ckpt = tf.train.get_checkpoint_state(FLAGS.train_dir)
         if ckpt and tf.train.checkpoint_exists(ckpt.model_checkpoint_path):
-            print "다음 파일에서 모델을 읽는 중 입니다..", ckpt.model_checkpoint_path
+            print ("다음 파일에서 모델을 읽는 중 입니다..", ckpt.model_checkpoint_path)
             model.saver.restore(sess, ckpt.model_checkpoint_path)
         else:
-            print "새로운 모델을 생성하는 중 입니다."
+            print ("새로운 모델을 생성하는 중 입니다.")
             sess.run(tf.global_variables_initializer())
+        # print ("새로운 모델을 생성하는 중 입니다.")
+        # sess.run(tf.global_variables_initializer())
+
 
         writer = tf.summary.FileWriter(FLAGS.log_dir, sess.graph)
 
@@ -35,23 +38,23 @@ def train(dialog, batch_size=100, epoch=100):
             if (step + 1) % 100 == 0:
                 model.write_logs(sess, writer, enc_input, dec_input, targets)
 
-                print 'Step:', '%06d' % model.global_step.eval(),\
-                      'cost =', '{:.6f}'.format(loss)
+                print ('Step:', '%06d' % model.global_step.eval(),\
+                      'cost =', '{:.6f}'.format(loss))
 
         checkpoint_path = os.path.join(FLAGS.train_dir, FLAGS.ckpt_name)
         model.saver.save(sess, checkpoint_path, global_step=model.global_step)
 
-    print '최적화 완료!'
+    print ('최적화 완료!')
 
 
 def test(dialog, batch_size=100):
-    print "\n=== 예측 테스트 ==="
+    print ("\n=== 예측 테스트 ===")
 
     model = Seq2Seq(dialog.vocab_size)
 
     with tf.Session() as sess:
         ckpt = tf.train.get_checkpoint_state(FLAGS.train_dir)
-        print "다음 파일에서 모델을 읽는 중 입니다..", ckpt.model_checkpoint_path
+        print ("다음 파일에서 모델을 읽는 중 입니다..", ckpt.model_checkpoint_path)
         model.saver.restore(sess, ckpt.model_checkpoint_path)
 
         enc_input, dec_input, targets = dialog.next_batch(batch_size)
@@ -66,11 +69,11 @@ def test(dialog, batch_size=100):
         expect = dialog.decode([dialog.examples[pick * 2 + 1]], True)
         outputs = dialog.cut_eos(outputs[pick])
 
-        print "\n정확도:", accuracy
-        print "랜덤 결과\n",
-        print "    입력값:", input
-        print "    실제값:", expect
-        print "    예측값:", ' '.join(outputs)
+        print ("\n정확도:", accuracy)
+        print ("랜덤 결과\n",)
+        print ("    입력값:", input)
+        print ("    실제값:", expect)
+        print ("    예측값:", ' '.join(outputs))
 
 
 def main(_):

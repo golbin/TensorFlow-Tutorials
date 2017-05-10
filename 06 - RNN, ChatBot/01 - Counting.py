@@ -69,25 +69,33 @@ b = tf.Variable(tf.random_normal([n_classes]))
 # [batch_size, n_steps, n_input]
 #    -> Tensor[n_steps, batch_size, n_input]
 X_t = tf.transpose(X, [1, 0, 2])
-#    -> Tensor[n_steps*batch_size, n_input]
-X_t = tf.reshape(X_t, [-1, n_input])
-#    -> [n_steps, Tensor[batch_size, n_input]]
-X_t = tf.split(0, n_steps, X_t)
+
+# Static RNN을 사용할 경우 아래 코드까지 사용
+# #    -> Tensor[n_steps*batch_size, n_input]
+# X_t = tf.reshape(X_t, [-1, n_input])
+# #    -> [n_steps, Tensor[batch_size, n_input]]
+# # X_t = tf.split(0, n_steps, X_t)  # tf 0.12
+# X_t = tf.split(X_t, n_steps, axis=0)
 
 # RNN 셀을 생성합니다.
 # 다음 함수들을 사용하면 다른 구조의 셀로 간단하게 변경할 수 있습니다
 # BasicRNNCell,BasicLSTMCell,GRUCell
-cell = tf.nn.rnn_cell.BasicRNNCell(n_hidden)
+cell = tf.contrib.rnn.BasicRNNCell(n_hidden)
 
-# tf.nn.rnn 함수를 이용해 순환 신경망을 만듭니다.
+# tf.nn.dynamic_rnn 함수를 이용해 순환 신경망을 만듭니다.
 # 역시 겁나 매직!!
-outputs, states = tf.nn.rnn(cell, X_t, dtype=tf.float32)
+outputs, states = tf.nn.dynamic_rnn(cell, X_t, dtype=tf.float32, time_major=True)
+
+# tf.contrib.rnn.static_rnn 함수를 이용할 경우 아래 코드 사용
+# outputs, states = tf.contrib.rnn.static_rnn(cell, X_t, dtype=tf.float32)
+
+
 
 # 손실 함수 작성을 위해 출력값을 Y 와 같은 형태의 차원으로 재구성합니다
 logits = tf.matmul(outputs[-1], W) + b
 
 cost = tf.reduce_mean(
-            tf.nn.softmax_cross_entropy_with_logits(logits, Y))
+            tf.nn.softmax_cross_entropy_with_logits(labels=Y, logits=logits))
 
 train_op = tf.train.RMSPropOptimizer(learning_rate=0.01).minimize(cost)
 
@@ -104,13 +112,13 @@ for epoch in range(10):
     _, loss = sess.run([train_op, cost], feed_dict={X: x_batch, Y: y_batch})
 
     # 학습하는 동안 예측값의 변화를 출력해봅니다.
-    print sess.run(tf.argmax(logits, 1), feed_dict={X: x_batch, Y: y_batch})
-    print sess.run(tf.argmax(Y, 1), feed_dict={X: x_batch, Y: y_batch})
+    print (sess.run(tf.argmax(logits, 1), feed_dict={X: x_batch, Y: y_batch}))
+    print (sess.run(tf.argmax(Y, 1), feed_dict={X: x_batch, Y: y_batch}))
 
-    print 'Epoch:', '%04d' % (epoch + 1), \
-        'cost =', '{:.6f}'.format(loss)
+    print ('Epoch:', '%04d' % (epoch + 1), \
+        'cost =', '{:.6f}'.format(loss))
 
-print '최적화 완료!'
+print ('최적화 완료!')
 
 
 #########
@@ -126,9 +134,9 @@ x_batch, y_batch = one_hot_seq(seq_data)
 real, predict, accuracy_val = sess.run([tf.argmax(Y, 1), prediction, accuracy],
                                        feed_dict={X: x_batch, Y: y_batch})
 
-print "\n=== 예측 결과 ==="
-print '순차열:', seq_data
-print '실제값:', [num_arr[i] for i in real]
-print '예측값:', [num_arr[i] for i in predict]
-print '정확도:', accuracy_val
+print ("\n=== 예측 결과 ===")
+print ('순차열:', seq_data)
+print ('실제값:', [num_arr[i] for i in real])
+print ('예측값:', [num_arr[i] for i in predict])
+print ('정확도:', accuracy_val)
 
