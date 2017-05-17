@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 # 털과 날개가 있는지 없는지에 따라, 포유류인지 조류인지 분류하는 신경망 모델을 만들어봅니다.
-
 import tensorflow as tf
 import numpy as np
 
@@ -25,29 +23,23 @@ y_data = np.array([
 X = tf.placeholder(tf.float32)
 Y = tf.placeholder(tf.float32)
 
-# 첫번째 가중치의 차원은 2차원으로 [특성, 히든 레이어의 뉴런갯수] -> [2, 10] 으로 정합니다.
-W1 = tf.Variable(tf.random_uniform([2, 10], -1., 1.))
-# 두번째 가중치의 차원을 [첫번째 히든 레이어의 뉴런 갯수, 분류 갯수] -> [10, 3] 으로 정합니다.
-W2 = tf.Variable(tf.random_uniform([10, 3], -1., 1.))
+# 신경망은 2차원으로 [입력층(특성), 출력층(레이블)] -> [2, 3] 으로 정합니다.
+W = tf.Variable(tf.random_uniform([2, 3], -1., 1.))
 
 # 편향을 각각 각 레이어의 아웃풋 갯수로 설정합니다.
-# b1 은 히든 레이어의 뉴런 갯수로, b2 는 최종 결과값 즉, 분류 갯수인 3으로 설정합니다.
-b1 = tf.Variable(tf.zeros([10]))
-b2 = tf.Variable(tf.zeros([3]))
+# 편향은 아웃풋의 갯수, 즉 최종 결과값의 분류 갯수인 3으로 설정합니다.
+b = tf.Variable(tf.zeros([3]))
 
-# 신경망의 히든 레이어에 가중치 W1과 편향 b1을 적용합니다
-L = tf.add(tf.matmul(X, W1), b1)
+# 신경망에 가중치 W과 편향 b을 적용합니다
+L = tf.add(tf.matmul(X, W), b)
 # 가중치와 편향을 이용해 계산한 결과 값에
 # 텐서플로우에서 기본적으로 제공하는 활성화 함수인 ReLU 함수를 적용합니다.
 L = tf.nn.relu(L)
 
-# 최종적인 아웃풋을 계산합니다.
-# 히든레이어에 두번째 가중치 W2와 편향 b2를 적용하여 3개의 출력값을 만들어냅니다.
-model = tf.add(tf.matmul(L, W2), b2)
 # 마지막으로 softmax 함수를 이용하여 출력값을 사용하기 쉽게 만듭니다
 # softmax 함수는 다음처럼 결과값을 전체합이 1인 확률로 만들어주는 함수입니다.
 # 예) [8.04, 2.76, -6.52] -> [0.53 0.24 0.23]
-model = tf.nn.softmax(model)
+model = tf.nn.softmax(L)
 
 # 신경망을 최적화하기 위한 비용 함수를 작성합니다.
 # 각 개별 결과에 대한 합을 구한 뒤 평균을 내는 방식을 사용합니다.
@@ -71,11 +63,11 @@ init = tf.global_variables_initializer()
 sess = tf.Session()
 sess.run(init)
 
-for step in xrange(100):
+for step in range(100):
     sess.run(train_op, feed_dict={X: x_data, Y: y_data})
 
     if (step + 1) % 10 == 0:
-        print (step + 1), sess.run(cost, feed_dict={X: x_data, Y: y_data})
+        print(step + 1, sess.run(cost, feed_dict={X: x_data, Y: y_data}))
 
 
 #########
@@ -83,13 +75,13 @@ for step in xrange(100):
 # 0: 기타 1: 포유류, 2: 조류
 ######
 # tf.argmax: 예측값과 실제값의 행렬에서 tf.argmax 를 이용해 가장 큰 값을 가져옵니다.
-# 예) [[0 1 0] [1 0 0]] -> [2 1]
-#    [[0.2 0.7 0.1] [0.9 0.1 0.]] -> [2 1]
+# 예) [[0 1 0] [1 0 0]] -> [1 0]
+#    [[0.2 0.7 0.1] [0.9 0.1 0.]] -> [1 0]
 prediction = tf.argmax(model, 1)
 target = tf.argmax(Y, 1)
-print '예측값:', sess.run(prediction, feed_dict={X: x_data})
-print '실제값:', sess.run(target, feed_dict={Y: y_data})
+print('예측값:', sess.run(prediction, feed_dict={X: x_data}))
+print('실제값:', sess.run(target, feed_dict={Y: y_data}))
 
-check_prediction = tf.equal(prediction, target)
-accuracy = tf.reduce_mean(tf.cast(check_prediction, tf.float32))
-print '정확도: %.2f' % sess.run(accuracy * 100, feed_dict={X: x_data, Y: y_data})
+is_correct = tf.equal(prediction, target)
+accuracy = tf.reduce_mean(tf.cast(is_correct, tf.float32))
+print('정확도: %.2f' % sess.run(accuracy * 100, feed_dict={X: x_data, Y: y_data}))

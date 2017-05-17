@@ -1,18 +1,21 @@
-# -*- coding: utf-8 -*-
-# 신경망의 레이어를 여러개로 구성하여 이제 진짜 딥러닝을 해 봅시다!
-
+# 털과 날개가 있는지 없는지에 따라, 포유류인지 조류인지 분류하는 신경망 모델을 만들어봅니다.
+# 신경망의 레이어를 여러개로 구성하여 말로만 듣던 딥러닝을 구성해 봅시다!
 import tensorflow as tf
 import numpy as np
 
-# 파일에서 자료 읽기
-data = np.loadtxt('./data.csv', delimiter=',',
-                  unpack=True, dtype='float32')
+# [털, 날개]
+x_data = np.array(
+    [[0, 0], [1, 0], [1, 1], [0, 0], [0, 0], [0, 1]])
 
-# csv 자료의 0,1 번째 열(특성)을 x_data 로
-# 나머지 열(분류)을 y_data 로 만들어줍니다.
-x_data = np.transpose(data[0:2])
-y_data = np.transpose(data[2:])
-
+# [기타, 포유류, 조류]
+y_data = np.array([
+    [1, 0, 0],  # 기타
+    [0, 1, 0],  # 포유류
+    [0, 0, 1],  # 조류
+    [1, 0, 0],
+    [1, 0, 0],
+    [0, 0, 1]
+])
 
 #########
 # 신경망 모델 구성
@@ -20,27 +23,28 @@ y_data = np.transpose(data[2:])
 X = tf.placeholder(tf.float32)
 Y = tf.placeholder(tf.float32)
 
-# 3개의 가중치 행렬 변수로 2개의 히든 레이어를 구성합니다.
-# 히든레이어에는 각각 10개, 20의 뉴런이 생기고 다음처럼 연결시킬 것 입니다.
-# 2 -> 10 -> 20 -> 3
+# 첫번째 가중치의 차원은 [특성, 히든 레이어의 뉴런갯수] -> [2, 10] 으로 정합니다.
 W1 = tf.Variable(tf.random_uniform([2, 10], -1., 1.))
-W2 = tf.Variable(tf.random_uniform([10, 20], -1., 1.))
-W3 = tf.Variable(tf.random_uniform([20, 3], -1., 1.))
+# 두번째 가중치의 차원을 [첫번째 히든 레이어의 뉴런 갯수, 분류 갯수] -> [10, 3] 으로 정합니다.
+W2 = tf.Variable(tf.random_uniform([10, 3], -1., 1.))
 
-# 입력값 X 와 변수 W1 을 이용해 첫번째 레이어를
-# 첫번째 레이어와 W2 를 이용해 두번째 레이어를 구성합니다.
-L1 = tf.nn.relu(tf.matmul(X, W1))
-L2 = tf.nn.relu(tf.matmul(L1, W2))
+# 편향을 각각 각 레이어의 아웃풋 갯수로 설정합니다.
+# b1 은 히든 레이어의 뉴런 갯수로, b2 는 최종 결과값 즉, 분류 갯수인 3으로 설정합니다.
+b1 = tf.Variable(tf.zeros([10]))
+b2 = tf.Variable(tf.zeros([3]))
 
-# 마지막으로 아웃풋을 만들기 위해 W3 를 곱해줍니다.
-# 비용 함수에 텐서플로우가 제공하는 softmax_cross_entropy_with_logits 함수를 사용하면,
-# 출력값에 먼저 softmax 함수를 적용할 필요가 없습니다.
-model = tf.matmul(L2, W3)
+# 신경망의 히든 레이어에 가중치 W1과 편향 b1을 적용합니다
+L1 = tf.add(tf.matmul(X, W1), b1)
+L1 = tf.nn.relu(L1)
+
+# 최종적인 아웃풋을 계산합니다.
+# 히든레이어에 두번째 가중치 W2와 편향 b2를 적용하여 3개의 출력값을 만들어냅니다.
+model = tf.add(tf.matmul(L1, W2), b2)
 
 # 텐서플로우에서 기본적으로 제공되는 크로스 엔트로피 함수를 이용해
 # 복잡한 수식을 사용하지 않고도 최적화를 위한 비용 함수를 다음처럼 간단하게 적용할 수 있습니다.
 cost = tf.reduce_mean(
-        tf.nn.softmax_cross_entropy_with_logits(model, Y))
+    tf.nn.softmax_cross_entropy_with_logits(labels=Y, logits=model))
 
 optimizer = tf.train.AdamOptimizer(learning_rate=0.01)
 train_op = optimizer.minimize(cost)
@@ -53,11 +57,11 @@ init = tf.global_variables_initializer()
 sess = tf.Session()
 sess.run(init)
 
-for step in xrange(100):
+for step in range(100):
     sess.run(train_op, feed_dict={X: x_data, Y: y_data})
 
     if (step + 1) % 10 == 0:
-        print (step + 1), sess.run(cost, feed_dict={X: x_data, Y: y_data})
+        print(step + 1, sess.run(cost, feed_dict={X: x_data, Y: y_data}))
 
 
 #########
@@ -66,9 +70,9 @@ for step in xrange(100):
 ######
 prediction = tf.argmax(model, 1)
 target = tf.argmax(Y, 1)
-print '예측값:', sess.run(prediction, feed_dict={X: x_data})
-print '실제값:', sess.run(target, feed_dict={Y: y_data})
+print('예측값:', sess.run(prediction, feed_dict={X: x_data}))
+print('실제값:', sess.run(target, feed_dict={Y: y_data}))
 
-check_prediction = tf.equal(prediction, target)
-accuracy = tf.reduce_mean(tf.cast(check_prediction, tf.float32))
-print '정확도: %.2f' % sess.run(accuracy * 100, feed_dict={X: x_data, Y: y_data})
+is_correct = tf.equal(prediction, target)
+accuracy = tf.reduce_mean(tf.cast(is_correct, tf.float32))
+print('정확도: %.2f' % sess.run(accuracy * 100, feed_dict={X: x_data, Y: y_data}))
