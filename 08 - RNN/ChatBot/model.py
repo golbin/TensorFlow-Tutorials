@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 # 자세한 설명은 상위 폴더의 03 - Seq2Seq.py 등에서 찾으실 수 있습니다.
-
 import tensorflow as tf
 
 
@@ -48,14 +46,16 @@ class Seq2Seq:
 
         self.outputs = tf.argmax(self.logits, 2)
 
-    def build_cells(self, output_keep_prob=0.5):
-        enc_cell = tf.contrib.rnn.BasicRNNCell(self.n_hidden)
-        enc_cell = tf.contrib.rnn.DropoutWrapper(enc_cell, output_keep_prob=output_keep_prob)
-        enc_cell = tf.contrib.rnn.MultiRNNCell([enc_cell] * self.n_layers)
+    def cell(self, n_hidden, output_keep_prob):
+        rnn_cell = tf.contrib.rnn.BasicRNNCell(self.n_hidden)
+        rnn_cell = tf.contrib.rnn.DropoutWrapper(rnn_cell, output_keep_prob=output_keep_prob)
+        return rnn_cell
 
-        dec_cell = tf.contrib.rnn.BasicRNNCell(self.n_hidden)
-        dec_cell = tf.contrib.rnn.DropoutWrapper(dec_cell, output_keep_prob=output_keep_prob)
-        dec_cell = tf.contrib.rnn.MultiRNNCell([dec_cell] * self.n_layers)
+    def build_cells(self, output_keep_prob=0.5):
+        enc_cell = tf.contrib.rnn.MultiRNNCell([self.cell(self.n_hidden, output_keep_prob)
+                                                for _ in range(self.n_layers)])
+        dec_cell = tf.contrib.rnn.MultiRNNCell([self.cell(self.n_hidden, output_keep_prob)
+                                                for _ in range(self.n_layers)])
 
         return enc_cell, dec_cell
 
