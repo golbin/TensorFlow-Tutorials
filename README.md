@@ -64,7 +64,7 @@
 - [02 - tf.layers](05%20-%20CNN/02%20-%20tf.layers.py)
   - 신경망 구성을 손쉽게 해 주는 High level API 인 layers 를 사용해봅니다.
 
-### [06 - Autoencoder, GAN](06%20-%20Autoencoder)
+### [06 - Autoencoder](06%20-%20Autoencoder)
 
 - [01 - Autoencoder](06%20-%20Autoencoder/01%20-%20Autoencoder.py)
   - 대표적인 비감독(Unsupervised) 학습 방법인 Autoencoder 를 사용해봅니다.
