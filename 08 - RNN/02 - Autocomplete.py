@@ -22,29 +22,29 @@ seq_data = ['word', 'wood', 'deep', 'dive', 'cold', 'cool', 'load', 'love', 'kis
 
 
 def make_batch(seq_data):
-    x_batch = []
-    y_batch = []
+    input_batch = []
+    target_batch = []
 
     for seq in seq_data:
         # 여기서 생성하는 x_data 와 y_data 는
         # 실제 숫자가 아니라 숫자 리스트의 인덱스 번호 입니다.
         # [0, 1, 2], [1, 2, 3], [2, 3, 4], [3, 4, 5] ...
-        x_data = [num_dic[n] for n in seq[:-1]]
+        input = [num_dic[n] for n in seq[:-1]]
         # 3, 4, 5, 6...10
-        y_data = num_dic[seq[-1]]
+        target = num_dic[seq[-1]]
         # one-hot 인코딩을 합니다.
         # if x_data is [0, 1, 2]:
         # [[ 1.  0.  0.  0.  0.  0.  0.  0.  0.  0.]
         #  [ 0.  1.  0.  0.  0.  0.  0.  0.  0.  0.]
         #  [ 0.  0.  1.  0.  0.  0.  0.  0.  0.  0.]]
-        x_batch.append(np.eye(dic_len)[x_data])
+        input_batch.append(np.eye(dic_len)[input])
         # 지금까지 손실함수로 사용하던 softmax_cross_entropy_with_logits 함수는
         # label 값을 one-hot 인코딩으로 넘겨줘야 하지만,
         # 이 예제에서 사용할 손실 함수인 sparse_softmax_cross_entropy_with_logits 는
         # one-hot 인코딩을 사용하지 않으므로 index 를 그냥 넘겨주면 됩니다.
-        y_batch.append([y_data])
+        target_batch.append([target])
 
-    return x_batch, y_batch
+    return input_batch, target_batch
 
 #########
 # 옵션 설정
@@ -60,6 +60,7 @@ n_step = 3
 n_class = dic_len
 # 히든 레이어의 특성치 갯수
 n_hidden = 128
+total_epoch = 30
 
 #########
 # 신경망 모델 구성
@@ -112,11 +113,11 @@ optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cost)
 sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 
-x_batch, y_batch = make_batch(seq_data)
+input_batch, target_batch = make_batch(seq_data)
 
-for epoch in range(10):
+for epoch in range(total_epoch):
     _, loss = sess.run([optimizer, cost],
-                       feed_dict={X: x_batch, Y: y_batch})
+                       feed_dict={X: input_batch, Y: target_batch})
 
     print('Epoch:', '%04d' % (epoch + 1),
           'cost =', '{:.6f}'.format(loss))
@@ -134,10 +135,10 @@ accuracy = tf.reduce_mean(tf.cast(prediction_check, tf.float32))
 
 # wor, coo, lov, kis 를 가지고 단어를 추측해보겠습니다.
 seq_data = ['word', 'cool', 'love', 'kiss']
-x_batch, y_batch = make_batch(seq_data)
+input_batch, target_batch = make_batch(seq_data)
 
 predict, accuracy_val = sess.run([prediction, accuracy],
-                                 feed_dict={X: x_batch, Y: y_batch})
+                                 feed_dict={X: input_batch, Y: target_batch})
 
 predict_words = []
 for idx, val in enumerate(seq_data):

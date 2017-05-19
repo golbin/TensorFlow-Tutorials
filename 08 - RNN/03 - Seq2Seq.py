@@ -46,6 +46,7 @@ learning_rate = 0.01
 # 입력과 출력의 형태가 one-hot 인코딩으로 같으므로 크기도 같다.
 n_class = n_input = dic_len
 n_hidden = 128
+total_epoch = 100
 
 
 #########
@@ -113,7 +114,7 @@ sess.run(tf.global_variables_initializer())
 
 input_batch, output_batch, target_batch = make_batch(seq_data)
 
-for epoch in range(100):
+for epoch in range(total_epoch):
     _, loss = sess.run([optimizer, cost],
                        feed_dict={enc_input: input_batch,
                                   dec_input: output_batch,
