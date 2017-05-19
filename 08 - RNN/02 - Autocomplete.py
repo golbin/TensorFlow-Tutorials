@@ -49,17 +49,15 @@ def make_batch(seq_data):
 # 옵션 설정
 ######
 learning_rate = 0.01
+n_hidden = 128
+total_epoch = 30
+# 타입 스텝: [1 2 3] => 3
+# RNN 을 구성하는 시퀀스의 갯수입니다.
+n_step = 3
 # 입력값 크기. 10개의 숫자에 대한 one-hot 인코딩이므로 10개가 됩니다.
 # 예) 3 => [0 0 1 0 0 0 0 0 0 0 0]
 # 출력값도 입력값과 마찬가지로 10개의 숫자로 분류합니다.
 n_input = n_class = dic_len
-# 타입 스텝: [1 2 3] => 3
-# RNN 을 구성하는 시퀀스의 갯수입니다.
-n_step = 3
-n_class = dic_len
-# 히든 레이어의 특성치 갯수
-n_hidden = 128
-total_epoch = 30
 
 #########
 # 신경망 모델 구성

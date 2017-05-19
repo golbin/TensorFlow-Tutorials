@@ -44,10 +44,10 @@ def make_batch(seq_data):
 # 옵션 설정
 ######
 learning_rate = 0.01
-# 입력과 출력의 형태가 one-hot 인코딩으로 같으므로 크기도 같다.
-n_class = n_input = dic_len
 n_hidden = 128
 total_epoch = 100
+# 입력과 출력의 형태가 one-hot 인코딩으로 같으므로 크기도 같다.
+n_class = n_input = dic_len
 
 
 #########
