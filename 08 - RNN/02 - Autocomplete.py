@@ -123,8 +123,6 @@ prediction = tf.cast(tf.argmax(model, 1), tf.int32)
 prediction_check = tf.equal(prediction, Y)
 accuracy = tf.reduce_mean(tf.cast(prediction_check, tf.float32))
 
-# wor, coo, lov, kis 를 가지고 단어를 추측해보겠습니다.
-seq_data = ['word', 'cool', 'love', 'kiss']
 input_batch, target_batch = make_batch(seq_data)
 
 predict, accuracy_val = sess.run([prediction, accuracy],
