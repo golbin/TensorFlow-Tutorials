@@ -64,8 +64,9 @@ n_input = n_class = dic_len
 ######
 X = tf.placeholder(tf.float32, [None, n_step, n_input])
 # 비용함수에 sparse_softmax_cross_entropy_with_logits 을 사용하므로
-# 출력값과의 계산을 위한 원본값의 형태는 다음과 같습니다.
-# [batch size, time steps]
+# 출력값과의 계산을 위한 원본값의 형태는 one-hot vector가 아니라 인덱스 숫자를 그대로 사용하기 때문에
+# 다음처럼 하나의 값만 있는 1차원 배열을 입력값으로 받습니다.
+# [3] [3] [15] [4] ...
 # 기존처럼 one-hot 인코딩을 사용한다면 입력값의 형태는 [None, n_class] 여야합니다.
 Y = tf.placeholder(tf.int32, [None])
 
