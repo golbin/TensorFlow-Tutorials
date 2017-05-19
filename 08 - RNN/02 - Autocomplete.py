@@ -41,7 +41,7 @@ def make_batch(seq_data):
         # label 값을 one-hot 인코딩으로 넘겨줘야 하지만,
         # 이 예제에서 사용할 손실 함수인 sparse_softmax_cross_entropy_with_logits 는
         # one-hot 인코딩을 사용하지 않으므로 index 를 그냥 넘겨주면 됩니다.
-        target_batch.append([target])
+        target_batch.append(target)
 
     return input_batch, target_batch
 
@@ -67,7 +67,7 @@ X = tf.placeholder(tf.float32, [None, n_step, n_input])
 # 출력값과의 계산을 위한 원본값의 형태는 다음과 같습니다.
 # [batch size, time steps]
 # 기존처럼 one-hot 인코딩을 사용한다면 입력값의 형태는 [None, n_class] 여야합니다.
-Y = tf.placeholder(tf.int32, [None, 1])
+Y = tf.placeholder(tf.int32, [None])
 
 W = tf.Variable(tf.random_normal([n_hidden, n_class]))
 b = tf.Variable(tf.random_normal([n_class]))
@@ -90,17 +90,10 @@ outputs, states = tf.nn.dynamic_rnn(multi_cell, X, dtype=tf.float32)
 outputs = tf.transpose(outputs, [1, 0, 2])
 outputs = outputs[-1]
 model = tf.matmul(outputs, W) + b
-# 단, sparse_softmax_cross_entropy_with_logits 함수의 labels 는
-# one-hot 인코딩을 사용하지 않기 때문에, 1차원 배열로 넘겨줍니다. (time step 이 1이기 때문)
-# [[1]]
-# [[2]]
-# [[3]]
-#  ...  -> [1], [2], [3] ...
-labels = tf.reshape(Y, [-1])
 
 cost = tf.reduce_mean(
             tf.nn.sparse_softmax_cross_entropy_with_logits(
-                logits=model, labels=labels))
+                logits=model, labels=Y))
 
 optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cost)
 
@@ -127,7 +120,7 @@ print('최적화 완료!')
 # 레이블값이 정수이므로 예측값도 정수로 변경해줍니다.
 prediction = tf.cast(tf.argmax(model, 1), tf.int32)
 # one-hot 인코딩이 아니므로 입력값을 그대로 비교합니다.
-prediction_check = tf.equal(prediction, labels)
+prediction_check = tf.equal(prediction, Y)
 accuracy = tf.reduce_mean(tf.cast(prediction_check, tf.float32))
 
 # wor, coo, lov, kis 를 가지고 단어를 추측해보겠습니다.
