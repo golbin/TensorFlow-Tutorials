@@ -4,7 +4,6 @@ import tensorflow as tf
 import numpy as np
 
 
-# char_arr = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
 char_arr = ['a', 'b', 'c', 'd', 'e', 'f', 'g',
             'h', 'i', 'j', 'k', 'l', 'm', 'n',
             'o', 'p', 'q', 'r', 's', 't', 'u',
@@ -26,14 +25,14 @@ def make_batch(seq_data):
     target_batch = []
 
     for seq in seq_data:
-        # 여기서 생성하는 x_data 와 y_data 는
-        # 실제 숫자가 아니라 숫자 리스트의 인덱스 번호 입니다.
-        # [0, 1, 2], [1, 2, 3], [2, 3, 4], [3, 4, 5] ...
+        # 여기서 생성하는 input_batch 와 target_batch 는
+        # 알파벳 배열의 인덱스 번호 입니다.
+        # [22, 14, 17] [22, 14, 14] [3, 4, 4] [3, 8, 21] ...
         input = [num_dic[n] for n in seq[:-1]]
-        # 3, 4, 5, 6...10
+        # 3, 3, 15, 4, 3 ...
         target = num_dic[seq[-1]]
         # one-hot 인코딩을 합니다.
-        # if x_data is [0, 1, 2]:
+        # if input is [0, 1, 2]:
         # [[ 1.  0.  0.  0.  0.  0.  0.  0.  0.  0.]
         #  [ 0.  1.  0.  0.  0.  0.  0.  0.  0.  0.]
         #  [ 0.  0.  1.  0.  0.  0.  0.  0.  0.  0.]]
