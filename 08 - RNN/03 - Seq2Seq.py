@@ -60,13 +60,6 @@ dec_input = tf.placeholder(tf.float32, [None, None, n_input])
 # [batch size, time steps]
 targets = tf.placeholder(tf.int64, [None, None])
 
-W = tf.Variable(tf.ones([n_hidden, n_class]))
-b = tf.Variable(tf.zeros([n_class]))
-
-# tf.nn.dynamic_rnn 옵션에서 time_major 값을 True 로 설정
-# [batch_size, n_steps, n_input] -> Tensor[n_steps, batch_size, n_input]
-enc_input = tf.transpose(enc_input, [1, 0, 2])
-dec_input = tf.transpose(dec_input, [1, 0, 2])
 
 # 인코더 셀을 구성한다.
 with tf.variable_scope('encode'):
@@ -88,16 +81,7 @@ with tf.variable_scope('decode'):
                                             dtype=tf.float32)
 
 
-# sparse_softmax_cross_entropy_with_logits 함수를 사용하기 위해
-# 각각의 텐서의 차원들을 다음과 같이 변형하여 계산한다.
-#    -> [batch size, time steps, hidden layers]
-time_steps = tf.shape(outputs)[1]
-#    -> [batch size * time steps, hidden layers]
-outputs_trans = tf.reshape(outputs, [-1, n_hidden])
-#    -> [batch size * time steps, class numbers]
-model = tf.matmul(outputs_trans, W) + b
-#    -> [batch size, time steps, class numbers]
-model = tf.reshape(model, [-1, time_steps, n_class])
+model = tf.layers.dense(outputs, n_class, activation=None)
 
 
 cost = tf.reduce_mean(
@@ -172,19 +156,19 @@ def decode_step_by_step(seq_data):
 print('\n=== 전체 시퀀스를 한 번에 예측 ===')
 
 # 결과를 모르므로 빈 시퀀스 값인 P로 값을 채웁니다.
-seq_data = ['word', 'PPPP']
+seq_data = ['word', 'PP']
 print('word ->', decode_at_once(seq_data))
 
-seq_data = ['wodr', 'PPPP']
+seq_data = ['wodr', 'PP']
 print('wodr ->', decode_at_once(seq_data))
 
-seq_data = ['love', 'PPPP']
+seq_data = ['love', 'PP']
 print('love ->', decode_at_once(seq_data))
 
-seq_data = ['loev', 'PPPP']
+seq_data = ['loev', 'PP']
 print('loev ->', decode_at_once(seq_data))
 
-seq_data = ['abcd', 'PPPP']
+seq_data = ['abcd', 'PP']
 print('abcd ->', decode_at_once(seq_data))
 
 
