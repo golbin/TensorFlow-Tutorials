@@ -112,79 +112,40 @@ print('최적화 완료!')
 
 
 #########
-# 입력만으로 다음 시퀀스를 예측해보자
+# 번역 테스트
 ######
-# 시퀀스 데이터를 받아 다음 결과를 예측하고 디코딩하는 함수
-def decode(seq_data):
-    prediction = tf.argmax(model, 2)
+# 단어를 입력받아 번역 단어를 예측하고 디코딩하는 함수
+def translate(word):
+    # 이 모델은 입력값과 출력값 데이터로 [영어단어, 한글단어] 사용하지만,
+    # 예측시에는 한글단어를 알지 못하므로, 디코더의 입출력값을 의미 없는 값인 P 값으로 채운다.
+    # ['word', 'PPPP']
+    seq_data = [word, 'P' * len(word)]
 
     input_batch, output_batch, target_batch = make_batch([seq_data])
+
+    # 결과가 [batch size, time step, input] 으로 나오기 때문에,
+    # 2번째 차원인 input 차원을 argmax 로 취해 가장 확률이 높은 글자를 예측 값으로 만든다.
+    prediction = tf.argmax(model, 2)
 
     result = sess.run(prediction,
                       feed_dict={enc_input: input_batch,
                                  dec_input: output_batch,
                                  targets: target_batch})
 
-    decode_seq = [[char_arr[i] for i in dec] for dec in result][0]
+    # 결과 값인 숫자의 인덱스에 해당하는 글자를 가져와 글자 배열을 만든다.
+    decoded = [char_arr[i] for i in result[0]]
 
-    return decode_seq
+    # 출력의 끝을 의미하는 'E' 이후의 글자들을 제거하고 문자열로 만든다.
+    end = decoded.index('E')
+    translated = ''.join(decoded[:end])
 
-
-# 한 번에 전체를 예측하고 E 이후의 글자를 잘라 단어를 완성
-def decode_at_once(seq_data):
-    seq = decode(seq_data)
-    end = seq.index('E')
-    seq = ''.join(seq[:end])
-
-    return seq
+    return translated
 
 
-# 시퀀스 데이터를 받아 다음 한글자를 예측하고,
-# 종료 심볼인 E 가 나올때까지 점진적으로 예측하여 최종 결과를 만드는 함수
-def decode_step_by_step(seq_data):
-    decode_seq = ''
-    current_seq = ''
+print('\n=== 번역 테스트 ===')
 
-    while current_seq != 'E':
-        decode_seq = decode(seq_data)
-        seq_data = [seq_data[0], ''.join(decode_seq)]
-        current_seq = decode_seq[-1]
-
-    return decode_seq
-
-
-print('\n=== 전체 시퀀스를 한 번에 예측 ===')
-
-# 결과를 모르므로 빈 시퀀스 값인 P로 값을 채웁니다.
-seq_data = ['word', 'PP']
-print('word ->', decode_at_once(seq_data))
-
-seq_data = ['wodr', 'PP']
-print('wodr ->', decode_at_once(seq_data))
-
-seq_data = ['love', 'PP']
-print('love ->', decode_at_once(seq_data))
-
-seq_data = ['loev', 'PP']
-print('loev ->', decode_at_once(seq_data))
-
-seq_data = ['abcd', 'PP']
-print('abcd ->', decode_at_once(seq_data))
-
-
-print('\n=== 한글자씩 점진적으로 시퀀스를 예측 ===')
-
-seq_data = ['word', '']
-print('word ->', decode_step_by_step(seq_data))
-
-seq_data = ['wodr', '']
-print('wodr ->', decode_step_by_step(seq_data))
-
-seq_data = ['love', '']
-print('love ->', decode_step_by_step(seq_data))
-
-seq_data = ['loev', '']
-print('loev ->', decode_step_by_step(seq_data))
-
-seq_data = ['abcd', '']
-print('abcd ->', decode_step_by_step(seq_data))
+print('word ->', translate('word'))
+print('wodr ->', translate('wodr'))
+print('love ->', translate('love'))
+print('loev ->', translate('loev'))
+print('abcd ->', translate('abcd'))
