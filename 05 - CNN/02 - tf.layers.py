@@ -28,7 +28,7 @@ L2 = tf.layers.dropout(L2, 0.7, is_training)
 
 L3 = tf.contrib.layers.flatten(L2)
 L3 = tf.layers.dense(L3, 256, activation=tf.nn.relu)
-L2 = tf.layers.dropout(L2, 0.5, is_training)
+L3 = tf.layers.dropout(L3, 0.5, is_training)
 
 model = tf.layers.dense(L3, 10, activation=None)
 
