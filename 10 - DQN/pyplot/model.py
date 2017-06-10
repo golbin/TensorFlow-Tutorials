@@ -8,165 +8,142 @@ from collections import deque
 
 
 class DQN:
-
-    # 다음에 취할 액션을 DQN 을 이용해 결정할 시기를 결정합니다.
-    # get_action 함수 참고
-    INITIAL_EPSILON = 1.0
-    FINAL_EPSILON = 0.01
-    EXPLORE = 1000.
-    # 학습 데이터를 어느정도 쌓은 후, 일정 시간 이후에 학습을 시작하도록 합니다.
-    OBSERVE = 100.
     # 학습에 사용할 플레이결과를 얼마나 많이 저장해서 사용할지를 정합니다.
     # (플레이결과 = 게임판의 상태 + 취한 액션 + 리워드 + 종료여부)
-    REPLAY_MEMORY = 50000
+    REPLAY_MEMORY = 10000
     # 학습시 사용/계산할 상태값(정확히는 replay memory)의 갯수를 정합니다.
-    BATCH_SIZE = 50
+    BATCH_SIZE = 32
     # 과거의 상태에 대한 가중치를 줄이는 역할을 합니다.
     GAMMA = 0.99
+    # 한 번에 볼 총 프레임 수 입니다.
+    # 앞의 상태까지 고려하기 위함입니다.
+    STATE_LEN = 4
 
-    def __init__(self, n_action, n_width, n_height, state):
+    def __init__(self, session, width, height, n_action):
+        self.session = session
         self.n_action = n_action
-        self.n_width = n_width
-        self.n_height = n_height
-
-        self.time_step = 0
-        self.epsilon = self.INITIAL_EPSILON
-        # 게임의 상태. 게임판의 상태를 말합니다.
-        # 학습으로 계산할 상태는 현재 게임판과, 과거 세 번의 게임판, 총 네 가지의 상태를 사용합니다.
-        self.state_t = np.stack((state, state, state, state), axis=1)[0]
+        self.width = width
+        self.height = height
         # 게임 플레이결과를 저장할 메모리
         self.memory = deque()
+        # 현재 게임판의 상태
+        self.state = None
 
         # 게임의 상태를 입력받을 변수
-        # [게임 상태의 갯수(현재+과거+과거..), 각 시점의 게임의 상태(게임판의 크기)]
-        self.input_state = tf.placeholder(tf.float32, [None, len(self.state_t), self.n_width * self.n_height])
-        # 각각의 상태를 만들어낸 액션의 값들입니다.
-        self.input_action = tf.placeholder(tf.float32, [None, self.n_action])
-        # DQN 의 가장 핵심적인 값이며 Q_action 을 계산하는데 사용할 값 입니다. train 함수를 참고하세요.
+        # [게임판의 가로 크기, 게임판의 세로 크기, 게임 상태의 갯수(현재+과거+과거..)]
+        self.input_X = tf.placeholder(tf.float32, [None, width, height, self.STATE_LEN])
+        # 각각의 상태를 만들어낸 액션의 값들입니다. 0, 1, 2 ..
+        self.input_A = tf.placeholder(tf.int64, [None])
+        # 손실값을 계산하는데 사용할 입력값입니다. train 함수를 참고하세요.
         self.input_Y = tf.placeholder(tf.float32, [None])
 
-        self.global_step = tf.Variable(0, trainable=False, name="global_step")
-        self.rewards = tf.placeholder(tf.float32, [None])
-        tf.summary.scalar('avg.reward', tf.reduce_mean(self.rewards))
+        self.Q_value = self._build_network('main')
+        self.cost, self.train_op = self._build_op()
 
-        self.Q_value, self.train_op = self.build_model()
+        # 학습을 더 잘 되게 하기 위해,
+        # 손실값 계산을 위해 사용하는 타겟(실측값)의 Q value를 계산하는 네트웍을 따로 만들어서 사용합니다
+        self.target_Q_value = self._build_network('target')
 
-        self.saver, self.session = self.init_session()
-        self.writer = tf.summary.FileWriter('logs', self.session.graph)
-        self.summary = tf.summary.merge_all()
+    def _build_network(self, name):
+        with tf.variable_scope(name):
+            model = tf.layers.conv2d(self.input_X, 32, [4, 4], padding='same', activation=tf.nn.relu)
+            model = tf.layers.conv2d(model, 64, [2, 2], padding='same', activation=tf.nn.relu)
+            model = tf.contrib.layers.flatten(model)
+            model = tf.layers.dense(model, 512, activation=tf.nn.relu)
 
-    def init_session(self):
-        saver = tf.train.Saver()
-        session = tf.InteractiveSession()
+            Q_value = tf.layers.dense(model, self.n_action, activation=None)
 
-        ckpt = tf.train.get_checkpoint_state('model')
-        if ckpt and tf.train.checkpoint_exists(ckpt.model_checkpoint_path):
-            print("다음 파일에서 모델을 읽는 중 입니다..", ckpt.model_checkpoint_path)
-            saver.restore(session, ckpt.model_checkpoint_path)
-        else:
-            print("새로운 모델을 생성하는 중 입니다.")
-            session.run(tf.global_variables_initializer())
+        return Q_value
 
-        return saver, session
-
-    def write_logs(self, reward):
-        if self.time_step % 100 == 0:
-            summary = self.summary.eval(feed_dict={self.rewards: reward})
-            self.writer.add_summary(summary, self.global_step.eval())
-
-        if self.time_step % 10000 == 0:
-            self.saver.save(self.session, 'model/dqn.ckpt', global_step=self.time_step)
-
-    def build_model(self):
-        # 계산 속도와 편의성을 위해 CNN 을 사용하지 않고, input_state 값을 flat 하게 만들어 계산합니다.
-        n_input = len(self.state_t) * self.n_width * self.n_height
-        state = tf.reshape(self.input_state, [-1, n_input])
-
-        W1 = tf.Variable(tf.truncated_normal([n_input, 128], stddev=0.01))
-        b1 = tf.Variable(tf.constant(0.01, shape=[128]))
-        L1 = tf.nn.relu(tf.matmul(state, W1) + b1)
-
-        W2 = tf.Variable(tf.truncated_normal([128, 256], stddev=0.01))
-        b2 = tf.Variable(tf.constant(0.01, shape=[256]))
-        L2 = tf.nn.relu(tf.matmul(L1, W2) + b2)
-
-        W3 = tf.Variable(tf.truncated_normal([256, self.n_action], stddev=0.01))
-        b3 = tf.Variable(tf.constant(0.01, shape=[self.n_action]))
-        Q_value = tf.matmul(L2, W3) + b3
-
+    def _build_op(self):
         # DQN 의 손실 함수를 구성하는 부분입니다. 다음 수식을 참고하세요.
         # Perform a gradient descent step on (y_j-Q(ð_j,a_j;θ))^2
-        Q_action = tf.reduce_sum(tf.mul(Q_value, self.input_action), axis=1)
-        cost = tf.reduce_mean(tf.square(self.input_Y - Q_action))
-        train_op = tf.train.AdamOptimizer(1e-6).minimize(cost, global_step=self.global_step)
+        one_hot = tf.one_hot(self.input_A, self.n_action, 1.0, 0.0)
+        Q_value = tf.reduce_sum(tf.multiply(self.Q_value, one_hot), axis=1)
+        cost = tf.reduce_mean(tf.square(self.input_Y - Q_value))
+        train_op = tf.train.AdamOptimizer(1e-6).minimize(cost)
 
-        return Q_value, train_op
+        return cost, train_op
 
-    def train(self):
-        # 게임 플레이를 저장한 메모리에서 배치 사이즈만큼을 샘플링하여 가져옵니다.
-        minibatch = random.sample(self.memory, self.BATCH_SIZE)
+    # refer: https://github.com/hunkim/ReinforcementZeroToAll/
+    def update_target_network(self):
+        copy_op = []
 
-        state = [data[0] for data in minibatch]
-        action = [data[1] for data in minibatch]
-        reward = [data[2] for data in minibatch]
-        next_state = [data[3] for data in minibatch]
+        main_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='main')
+        target_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='target')
 
-        Y = []
-        Q_value = self.Q_value.eval(feed_dict={self.input_state: next_state})
+        # 학습 네트웍의 변수의 값들을 타겟 네트웍으로 복사해서 타겟 네트웍의 값들을 최신으로 업데이트합니다.
+        for main_var, target_var in zip(main_vars, target_vars):
+            copy_op.append(target_var.assign(main_var.value()))
 
-        # DQN 의 손실 함수에 사용할 핵심적인 값을 계산하는 부분입니다. 다음 수식을 참고하세요.
-        # if episode is terminates at step j+1 then r_j
-        # otherwise r_j + γ*max_a'Q(ð_(j+1),a';θ')
-        for i in range(0, self.BATCH_SIZE):
-            if minibatch[i][4]:
-                Y.append(reward[i])
-            else:
-                Y.append(reward[i] + self.GAMMA * np.max(Q_value[i]))
+        self.session.run(copy_op)
 
-        self.train_op.run(feed_dict={
-            self.input_Y: Y,
-            self.input_action: action,
-            self.input_state: state
-        })
+    def get_action(self):
+        Q_value = self.session.run(self.Q_value,
+                                   feed_dict={self.input_X: [self.state]})
 
-        self.write_logs(reward)
+        action = np.argmax(Q_value[0])
 
-    def step(self, state, action, reward, terminal):
+        return action
+
+    def init_state(self, state):
+        # 현재 게임판의 상태를 초기화합니다. 앞의 상태까지 고려한 스택으로 되어 있습니다.
+        state = [state for _ in range(self.STATE_LEN)]
+        # axis=2 는 input_X 의 값이 다음처럼 마지막 차원으로 쌓아올린 형태로 만들었기 때문입니다.
+        # 이렇게 해야 컨볼루션 레이어를 손쉽게 이용할 수 있습니다.
+        # self.input_X = tf.placeholder(tf.float32, [None, width, height, self.STATE_LEN])
+        self.state = np.stack(state, axis=2)
+
+    def remember(self, state, action, reward, terminal):
         # 학습데이터로 현재의 상태만이 아닌, 과거의 상태까지 고려하여 계산하도록 하였고,
         # 이 모델에서는 과거 3번 + 현재 = 총 4번의 상태를 계산하도록 하였으며,
         # 새로운 상태가 들어왔을 때, 가장 오래된 상태를 제거하고 새로운 상태를 넣습니다.
-        next_state = np.append(self.state_t[1:, :], state, axis=0)
+        next_state = np.reshape(state, (self.width, self.height, 1))
+        next_state = np.append(self.state[:, :, 1:], next_state, axis=2)
+
         # 플레이결과, 즉, 액션으로 얻어진 상태와 보상등을 메모리에 저장합니다.
-        self.memory.append((self.state_t, action, reward, next_state, terminal))
+        self.memory.append((self.state, next_state, action, reward, terminal))
 
         # 저장할 플레이결과의 갯수를 제한합니다.
         if len(self.memory) > self.REPLAY_MEMORY:
             self.memory.popleft()
 
-        # 일정시간 이상 반복이 이루어진 이후에(데이터가 쌓인 이후에) 학습을 시작합니다.
-        if self.time_step > self.OBSERVE:
-            self.train()
+        self.state = next_state
 
-        self.state_t = next_state
-        self.time_step += 1
+    def _sample_memory(self):
+        sample_memory = random.sample(self.memory, self.BATCH_SIZE)
 
-    def get_action(self, train=False):
-        # action 과 Q_value 는 one-hot 벡터를 이용합니다.
-        action = np.zeros(self.n_action)
+        state = [memory[0] for memory in sample_memory]
+        next_state = [memory[1] for memory in sample_memory]
+        action = [memory[2] for memory in sample_memory]
+        reward = [memory[3] for memory in sample_memory]
+        terminal = [memory[4] for memory in sample_memory]
 
-        # 학습 초기에는 액션을 랜덤한 값으로 결정합니다.
-        # 이후 학습을 진행하면서 점진적으로 더 많은 결정을 DQN 이 하도록 합니다.
-        if train and random.random() <= self.epsilon:
-            index = random.randrange(self.n_action)
-        else:
-            Q_value = self.Q_value.eval(feed_dict={self.input_state: [self.state_t]})[0]
-            index = np.argmax(Q_value)
+        return state, next_state, action, reward, terminal
 
-        action[index] = 1
+    def train(self):
+        # 게임 플레이를 저장한 메모리에서 배치 사이즈만큼을 샘플링하여 가져옵니다.
+        state, next_state, action, reward, terminal = self._sample_memory()
 
-        # 학습이 일정시간 이상 지났을 때부터 입실론 값을 점진적으로 줄이며,
-        # 얼마나 단계적으로, 또 얼마나 많이 액션값을 DQN 에 맡길지를 결정하기 위한 로직입니다.
-        if self.epsilon > self.FINAL_EPSILON and self.time_step > self.OBSERVE:
-            self.epsilon -= (self.INITIAL_EPSILON - self.FINAL_EPSILON) / self.EXPLORE
+        # 학습시 다음 상태를 만들어 낸 Q value를 입력값으로
+        # 타겟 네트웍의 Q value를 실측값으로하여 학습합니다
+        Q_value = self.session.run(self.target_Q_value,
+                                   feed_dict={self.input_X: next_state})
 
-        return action
+        # DQN 의 손실 함수에 사용할 핵심적인 값을 계산하는 부분입니다. 다음 수식을 참고하세요.
+        # if episode is terminates at step j+1 then r_j
+        # otherwise r_j + γ*max_a'Q(ð_(j+1),a';θ')
+        # input_Y 에 들어갈 값들을 계산해서 넣습니다.
+        Y = []
+        for i in range(self.BATCH_SIZE):
+            if terminal[i]:
+                Y.append(reward[i])
+            else:
+                Y.append(reward[i] + self.GAMMA * np.max(Q_value[i]))
+
+        self.session.run(self.train_op,
+                         feed_dict={
+                             self.input_X: state,
+                             self.input_A: action,
+                             self.input_Y: Y
+                         })

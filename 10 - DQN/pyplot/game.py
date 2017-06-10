@@ -28,9 +28,9 @@ class Game:
         self.show_game = show_game
 
         if show_game:
-            self.fig, self.axis = self.prepare_display()
+            self.fig, self.axis = self._prepare_display()
 
-    def prepare_display(self):
+    def _prepare_display(self):
         """게임을 화면에 보여주기 위해 matplotlib 으로 출력할 화면을 설정합니다."""
         fig, axis = plt.subplots(figsize=(4, 6))
         fig.set_size_inches(4, 6)
@@ -48,7 +48,7 @@ class Game:
 
         return fig, axis
 
-    def get_state(self):
+    def _get_state(self):
         """게임의 상태를 가져옵니다.
 
         게임의 상태는 screen_width x screen_height 크기로 각 위치에 대한 상태값을 가지고 있으며,
@@ -65,9 +65,9 @@ class Game:
         if self.block[1]["row"] < self.screen_height:
             state[self.block[1]["col"], self.block[1]["row"]] = 1
 
-        return state.reshape((-1, self.screen_width * self.screen_height))
+        return state
 
-    def draw_screen(self):
+    def _draw_screen(self):
         title = " Avg. Reward: %d Reward: %d Total Game: %d" % (
                         self.total_reward / self.total_game,
                         self.current_reward,
@@ -112,9 +112,11 @@ class Game:
         self.block[1]["col"] = random.randrange(self.road_left, self.road_right + 1)
         self.block[1]["row"] = 0
 
-        self.update_block()
+        self._update_block()
 
-    def update_car(self, move):
+        return self._get_state()
+
+    def _update_car(self, move):
         """액션에 따라 자동차를 이동시킵니다.
 
         자동차 위치 제한을 도로가 아니라 화면의 좌우측 끝으로 하고,
@@ -126,7 +128,7 @@ class Game:
         # 자동차의 위치가 도로의 우측을 넘지 않도록 합니다.: min(max, screen_width) < screen_width
         self.car["col"] = min(self.car["col"], self.road_right)
 
-    def update_block(self):
+    def _update_block(self):
         """장애물을 이동시킵니다.
 
         장애물이 화면 내에 있는 경우는 각각의 속도에 따라 위치 변경을,
@@ -150,7 +152,7 @@ class Game:
 
         return reward
 
-    def is_gameover(self):
+    def _is_gameover(self):
         # 장애물과 자동차가 충돌했는지를 파악합니다.
         # 사각형 박스의 충돌을 체크하는 것이 아니라 좌표를 체크하는 것이어서 화면에는 약간 다르게 보일 수 있습니다.
         if ((self.car["col"] == self.block[0]["col"] and
@@ -164,16 +166,16 @@ class Game:
         else:
             return False
 
-    def proceed(self, action):
+    def step(self, action):
         # action: 0: 좌, 1: 유지, 2: 우
         # action - 1 을 하여, 좌표를 액션이 0 일 경우 -1 만큼, 2 일 경우 1 만큼 옮깁니다.
-        self.update_car(action - 1)
+        self._update_car(action - 1)
         # 장애물을 이동시킵니다. 장애물이 자동차에 충돌하지 않고 화면을 모두 지나가면 보상을 얻습니다.
-        escape_reward = self.update_block()
+        escape_reward = self._update_block()
         # 움직임이 적을 경우에도 보상을 줘서 안정적으로 이동하는 것 처럼 보이게 만듭니다.
         stable_reward = 1. / self.screen_height if action == 1 else 0
         # 게임이 종료됐는지를 판단합니다. 자동차와 장애물이 충돌했는지를 파악합니다.
-        gameover = self.is_gameover()
+        gameover = self._is_gameover()
 
         if gameover:
             # 장애물에 충돌한 경우 -2점을 보상으로 줍니다. 장애물이 두 개이기 때문입니다.
@@ -184,6 +186,6 @@ class Game:
             self.current_reward += reward
 
         if self.show_game:
-            self.draw_screen()
+            self._draw_screen()
 
-        return reward, gameover
+        return self._get_state(), reward, gameover
