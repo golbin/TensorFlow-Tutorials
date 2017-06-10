@@ -1,116 +1,153 @@
-import gym
-import time
-import threading
-import numpy as np
+# 게임 구현과 DQN 모델을 이용해 게임을 실행하고 학습을 진행합니다.
 import tensorflow as tf
-from scipy.misc import imresize
+import numpy as np
+import random
+import time
 
-from brain import Brain
-
-
-# 이미지 사이즈를 줄이고, 흑백 사진으로 만듭니다.
-def preprocess(screen, width, height):
-    # 완전한 그레이스케일이 아닌 적당한 수준의 흑백으로 만듭니다.
-    gray = screen.astype('float32').mean(2)
-    # 이미지를 리사이즈하고 수치를 보정합니다. 0~1.0 사이의 값으로 만듭니다.
-    processed = imresize(gray, (width, height)).astype('float32') * (1. / 255)
-
-    return processed
+from game import Game
+from model import DQN
 
 
-def trainer(brain):
-    # 컴퓨터의 성능에 따라 학습 빈도를 적절히 제어 할 필요가 있습니다.
-    # 원래는 게임 몇 프레임마다 학습을 한 번씩 하게 해야 하지만,,
-    # 일반 컴퓨터/CPU로 학습을 시키는 경우 학습 속도가 느려 학습과정을 보기 어려워
-    # 적당한 미니배치 사이즈로 계속 학습을 시키도록 했습니다.
-    # 컴퓨터가 빠르거나 여러개의 GPU를 사용할 수 있다면
-    # 게임 안에 학습 과정을 넣거나, 게임을 여러개를 한 번에 돌리는 방법을 써봐도 좋겠습니다.
-    steps = 1
-    while True:
-        if len(brain.memory) > 5000:
-            if steps == 1:
-                print('Trainer: 학습 시작!')
+tf.app.flags.DEFINE_boolean("train", False, "학습모드. 게임을 화면에 보여주지 않습니다.")
+FLAGS = tf.app.flags.FLAGS
 
-            brain.train()
-            steps += 1
-        else:
-            time.sleep(1)
+# 최대 학습 횟수
+MAX_EPISODE = 10000
+# 1000번의 학습마다 한 번씩 타겟 네트웍을 업데이트합니다.
+TARGET_UPDATE_INTERVAL = 1000
+# 4 프레임마다 한 번씩 학습합니다.
+TRAIN_INTERVAL = 4
+# 학습 데이터를 어느정도 쌓은 후, 일정 시간 이후에 학습을 시작하도록 합니다.
+OBSERVE = 100
 
-        if steps % 100 == 0:
-            print('Trainer: 타겟 네트웍 업데이트. Step: {}'.format(steps))
-            brain.update_target_network()
+# action: 0: 좌, 1: 유지, 2: 우
+NUN_ACTION = 3
+SCREEN_WIDTH = 6
+SCREEN_HEIGHT = 10
 
 
-MAX_EPISODE = 9999999
-SCREEN_WIDTH = 84
-SCREEN_HEIGHT = 84
-ENV_NAME = 'Breakout-v0'
-# ENV_NAME = 'Freeway-v0'
-# ENV_NAME = 'Pong-v0'
+def train():
+    print('뇌세포 깨우는 중..')
+    sess = tf.Session()
 
-env = gym.make(ENV_NAME)
+    game = Game(SCREEN_WIDTH, SCREEN_HEIGHT, show_game=False)
+    brain = DQN(sess, SCREEN_WIDTH, SCREEN_HEIGHT, NUN_ACTION)
 
-sess = tf.Session()
+    rewards = tf.placeholder(tf.float32, [None])
+    tf.summary.scalar('avg.reward/ep.', tf.reduce_mean(rewards))
 
-print('뇌세포 깨우는 중..')
-brain = Brain(session=sess,
-              width=SCREEN_WIDTH, height=SCREEN_HEIGHT,
-              n_action=env.action_space.n)
+    saver = tf.train.Saver()
+    sess.run(tf.global_variables_initializer())
 
-sess.run(tf.global_variables_initializer())
+    writer = tf.summary.FileWriter('logs', sess.graph)
+    summary_merged = tf.summary.merge_all()
 
-# 타겟 네트웍을 초기화합니다.
-brain.update_target_network()
+    # 타겟 네트웍을 초기화합니다.
+    brain.update_target_network()
 
-# 학습을 시키는 trainer 함수를 쓰레드로 돌립니다. 게임과 학습을 동시에 진행합니다.
-# 컴퓨터가 빠르거나 반대로 너무 느리면 쓰레드 대신 게임 반복문 안에서 순차적으로 학습시키는 것이 좋을 수 있습니다.
-train_thread = threading.Thread(target=trainer, args=[brain])
-train_thread.start()
-
-# 게임을 시작합니다.
-for episode in range(MAX_EPISODE):
-    terminal = False
-    total_reward = 0.
     # 다음에 취할 액션을 DQN 을 이용해 결정할 시기를 결정합니다.
-    # 초반에는 액션을 랜덤값을 이용합니다. 아직 학습이 되지 않았기 때문입니다.
-    # refer: https://github.com/hunkim/ReinforcementZeroToAll/
-    epsilon = 1. / ((episode / 100) + 1)
+    epsilon = 1.0
+    # 프레임 횟수
+    time_step = 0
+    total_reward_list = []
 
-    # 게임 상태를 초기화합니다.
-    state = env.reset()
-    state = preprocess(state, SCREEN_WIDTH, SCREEN_HEIGHT)
-    brain.init_state(state)
+    # 게임을 시작합니다.
+    for episode in range(MAX_EPISODE):
+        terminal = False
+        total_reward = 0
 
-    while not terminal:
-        # 학습을 한 번도 하지 않았을 때와 입실론이 랜덤값보다 작은 경우에는 랜덤한 액션을 선택합니다.
-        # 위의 수식에 의하면 랜덤값을 사용하는 빈도가 점점 줄어들다가
-        # 1000번 정도의 에피소드가 지나면 랜덤값을 거의 사용하지 않게됩니다.
-        if episode < 10 or np.random.rand() < epsilon:
-            action = env.action_space.sample()
-        else:
+        # 게임을 초기화하고 현재 상태를 가져옵니다.
+        # 상태는 screen_width x screen_height 크기의 화면 구성입니다.
+        state = game.reset()
+        brain.init_state(state)
+
+        while not terminal:
+            # 입실론이 랜덤값보다 작은 경우에는 랜덤한 액션을 선택하고
+            # 그 이상일 경우에는 DQN을 이용해 액션을 선택합니다.
+            # 초반엔 학습이 적게 되어 있기 때문입니다.
+            # 초반에는 거의 대부분 랜덤값을 사용하다가 점점 줄어들어
+            # 나중에는 거의 사용하지 않게됩니다.
+            if np.random.rand() < epsilon:
+                action = random.randrange(NUN_ACTION)
+            else:
+                action = brain.get_action()
+
+            # 일정 시간이 지난 뒤 부터 입실론 값을 줄입니다.
+            # 초반에는 학습이 전혀 안되어 있기 때문입니다.
+            if episode > OBSERVE:
+                epsilon -= 1 / 1000
+
+            # 결정한 액션을 이용해 게임을 진행하고, 보상과 게임의 종료 여부를 받아옵니다.
+            state, reward, terminal = game.step(action)
+            total_reward += reward
+
+            # 현재 상태를 Brain에 기억시킵니다.
+            # 기억한 상태를 이용해 학습하고, 다음 상태에서 취할 행동을 결정합니다.
+            brain.remember(state, action, reward, terminal)
+
+            if time_step > OBSERVE and time_step % TRAIN_INTERVAL == 0:
+                # DQN 으로 학습을 진행합니다.
+                brain.train()
+
+            if time_step % TARGET_UPDATE_INTERVAL == 0:
+                # 타겟 네트웍을 업데이트 해 줍니다.
+                brain.update_target_network()
+
+            time_step += 1
+
+        print('게임횟수: %d 점수: %d' % (episode + 1, total_reward))
+
+        total_reward_list.append(total_reward)
+
+        if episode % 10 == 0:
+            summary = sess.run(summary_merged, feed_dict={rewards: total_reward_list})
+            writer.add_summary(summary, time_step)
+            total_reward_list = []
+
+        if episode % 100 == 0:
+            saver.save(sess, 'model/dqn.ckpt', global_step=time_step)
+
+
+def replay():
+    print('뇌세포 깨우는 중..')
+    sess = tf.Session()
+
+    game = Game(SCREEN_WIDTH, SCREEN_HEIGHT, show_game=True)
+    brain = DQN(sess, SCREEN_WIDTH, SCREEN_HEIGHT, NUN_ACTION)
+
+    saver = tf.train.Saver()
+    ckpt = tf.train.get_checkpoint_state('model')
+    saver.restore(sess, ckpt.model_checkpoint_path)
+
+    # 게임을 시작합니다.
+    for episode in range(MAX_EPISODE):
+        terminal = False
+        total_reward = 0
+
+        state = game.reset()
+        brain.init_state(state)
+
+        while not terminal:
             action = brain.get_action()
 
-        state, reward, terminal, info = env.step(action)
-        total_reward += reward
+            # 결정한 액션을 이용해 게임을 진행하고, 보상과 게임의 종료 여부를 받아옵니다.
+            state, reward, terminal = game.step(action)
+            total_reward += reward
 
-        if terminal:
-            reward = -1
+            brain.remember(state, action, reward, terminal)
 
-        # 현재 상태를 Brain에 기억시킵니다.
-        # 기억한 상태를 이용해 학습하고, 다음 상태에서 취할 행동을 결정합니다.
-        state = preprocess(state, SCREEN_WIDTH, SCREEN_HEIGHT)
-        brain.remember(state, action, reward, terminal)
+            # 게임 진행을 인간이 인지할 수 있는 속도로^^; 보여줍니다.
+            time.sleep(0.3)
 
-        # 화면을 그립니다.
-        env.render()
+        print('게임횟수: %d 점수: %d' % (episode + 1, total_reward))
 
-    print('게임횟수: {} 점수: {}'.format(episode + 1, total_reward))
 
-    # 에피소드 10회가 지나면 매 회 3번의 샘플링 학습을 시킵니다.
-    # 학습을 쓰레드로 동시에 시키지 않고 에피소드가 끝난 후 시키려면 이 코드를 사용하세요.
-    # if episode > 9:
-    #     for count in range(3):
-    #         brain.train()
-    #
-    #     # 타겟 네트웍을 업데이트 해 줍니다.
-    #     brain.update_target_network()
+def main(_):
+    if FLAGS.train:
+        train()
+    else:
+        replay()
+
+
+if __name__ == '__main__':
+    tf.app.run()
