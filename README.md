@@ -20,7 +20,7 @@
     - matplotlib 2.0
     - pillow 4.1
 
-※ 아직 DQN과 ChatBot은 수정/확인 중 입니다.
+※ ChatBot은 수정/확인 중 입니다.
 
 ## 간단한 설명
 
