@@ -21,7 +21,7 @@ TRAIN_INTERVAL = 4
 OBSERVE = 100
 
 # action: 0: 좌, 1: 유지, 2: 우
-NUN_ACTION = 3
+NUM_ACTION = 3
 SCREEN_WIDTH = 6
 SCREEN_HEIGHT = 10
 
@@ -31,7 +31,7 @@ def train():
     sess = tf.Session()
 
     game = Game(SCREEN_WIDTH, SCREEN_HEIGHT, show_game=False)
-    brain = DQN(sess, SCREEN_WIDTH, SCREEN_HEIGHT, NUN_ACTION)
+    brain = DQN(sess, SCREEN_WIDTH, SCREEN_HEIGHT, NUM_ACTION)
 
     rewards = tf.placeholder(tf.float32, [None])
     tf.summary.scalar('avg.reward/ep.', tf.reduce_mean(rewards))
@@ -68,7 +68,7 @@ def train():
             # 초반에는 거의 대부분 랜덤값을 사용하다가 점점 줄어들어
             # 나중에는 거의 사용하지 않게됩니다.
             if np.random.rand() < epsilon:
-                action = random.randrange(NUN_ACTION)
+                action = random.randrange(NUM_ACTION)
             else:
                 action = brain.get_action()
 
