@@ -1,5 +1,4 @@
 # 알파고를 만든 구글의 딥마인드의 논문을 참고한 DQN 모델을 생성합니다.
-# 딥마인드의 논문에서는 신경망 모델을 CNN 모델을 사용하지만, 여기서는 간단히 기본적인 신경망 모델을 사용합니다.
 # http://www.nature.com/nature/journal/v518/n7540/full/nature14236.html
 import tensorflow as tf
 import numpy as np
