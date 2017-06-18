@@ -36,12 +36,12 @@ class DQN:
         # 손실값을 계산하는데 사용할 입력값입니다. train 함수를 참고하세요.
         self.input_Y = tf.placeholder(tf.float32, [None])
 
-        self.Q_value = self._build_network('main')
+        self.Q = self._build_network('main')
         self.cost, self.train_op = self._build_op()
 
         # 학습을 더 잘 되게 하기 위해,
         # 손실값 계산을 위해 사용하는 타겟(실측값)의 Q value를 계산하는 네트웍을 따로 만들어서 사용합니다
-        self.target_Q_value = self._build_network('target')
+        self.target_Q = self._build_network('target')
 
     def _build_network(self, name):
         with tf.variable_scope(name):
@@ -50,15 +50,15 @@ class DQN:
             model = tf.contrib.layers.flatten(model)
             model = tf.layers.dense(model, 512, activation=tf.nn.relu)
 
-            Q_value = tf.layers.dense(model, self.n_action, activation=None)
+            Q = tf.layers.dense(model, self.n_action, activation=None)
 
-        return Q_value
+        return Q
 
     def _build_op(self):
         # DQN 의 손실 함수를 구성하는 부분입니다. 다음 수식을 참고하세요.
         # Perform a gradient descent step on (y_j-Q(ð_j,a_j;θ))^2
         one_hot = tf.one_hot(self.input_A, self.n_action, 1.0, 0.0)
-        Q_value = tf.reduce_sum(tf.multiply(self.Q_value, one_hot), axis=1)
+        Q_value = tf.reduce_sum(tf.multiply(self.Q, one_hot), axis=1)
         cost = tf.reduce_mean(tf.square(self.input_Y - Q_value))
         train_op = tf.train.AdamOptimizer(1e-6).minimize(cost)
 
@@ -78,7 +78,7 @@ class DQN:
         self.session.run(copy_op)
 
     def get_action(self):
-        Q_value = self.session.run(self.Q_value,
+        Q_value = self.session.run(self.Q,
                                    feed_dict={self.input_X: [self.state]})
 
         action = np.argmax(Q_value[0])
@@ -124,10 +124,9 @@ class DQN:
         # 게임 플레이를 저장한 메모리에서 배치 사이즈만큼을 샘플링하여 가져옵니다.
         state, next_state, action, reward, terminal = self._sample_memory()
 
-        # 학습시 다음 상태를 만들어 낸 Q value를 입력값으로
-        # 타겟 네트웍의 Q value를 실측값으로하여 학습합니다
-        Q_value = self.session.run(self.target_Q_value,
-                                   feed_dict={self.input_X: next_state})
+        # 학습시 다음 상태를 타겟 네트웍에 넣어 target Q value를 구합니다
+        target_Q_value = self.session.run(self.target_Q,
+                                          feed_dict={self.input_X: next_state})
 
         # DQN 의 손실 함수에 사용할 핵심적인 값을 계산하는 부분입니다. 다음 수식을 참고하세요.
         # if episode is terminates at step j+1 then r_j
@@ -138,7 +137,7 @@ class DQN:
             if terminal[i]:
                 Y.append(reward[i])
             else:
-                Y.append(reward[i] + self.GAMMA * np.max(Q_value[i]))
+                Y.append(reward[i] + self.GAMMA * np.max(target_Q_value[i]))
 
         self.session.run(self.train_op,
                          feed_dict={
