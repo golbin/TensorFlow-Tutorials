@@ -74,14 +74,14 @@ W = tf.Variable(tf.random_normal([n_hidden, n_class]))
 b = tf.Variable(tf.random_normal([n_class]))
 
 # RNN 셀을 생성합니다.
-cell1 = tf.contrib.rnn.BasicLSTMCell(n_hidden)
+cell1 = tf.nn.rnn_cell.BasicLSTMCell(n_hidden)
 # 과적합 방지를 위한 Dropout 기법을 사용합니다.
-cell1 = tf.contrib.rnn.DropoutWrapper(cell1, output_keep_prob=0.5)
+cell1 = tf.nn.rnn_cell.DropoutWrapper(cell1, output_keep_prob=0.5)
 # 여러개의 셀을 조합해서 사용하기 위해 셀을 추가로 생성합니다.
-cell2 = tf.contrib.rnn.BasicLSTMCell(n_hidden)
+cell2 = tf.nn.rnn_cell.BasicLSTMCell(n_hidden)
 
 # 여러개의 셀을 조합한 RNN 셀을 생성합니다.
-multi_cell = tf.contrib.rnn.MultiRNNCell([cell1, cell2])
+multi_cell = tf.nn.rnn_cell.MultiRNNCell([cell1, cell2])
 
 # tf.nn.dynamic_rnn 함수를 이용해 순환 신경망을 만듭니다.
 # time_major=True

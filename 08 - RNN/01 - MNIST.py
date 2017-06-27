@@ -31,7 +31,7 @@ b = tf.Variable(tf.random_normal([n_class]))
 # RNN 에 학습에 사용할 셀을 생성합니다
 # 다음 함수들을 사용하면 다른 구조의 셀로 간단하게 변경할 수 있습니다
 # BasicRNNCell,BasicLSTMCell,GRUCell
-cell = tf.contrib.rnn.BasicRNNCell(n_hidden)
+cell = tf.nn.rnn_cell.BasicRNNCell(n_hidden)
 
 # RNN 신경망을 생성합니다
 # 원래는 다음과 같은 과정을 거쳐야 하지만

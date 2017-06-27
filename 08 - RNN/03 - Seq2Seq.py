@@ -63,16 +63,16 @@ targets = tf.placeholder(tf.int64, [None, None])
 
 # 인코더 셀을 구성한다.
 with tf.variable_scope('encode'):
-    enc_cell = tf.contrib.rnn.BasicRNNCell(n_hidden)
-    enc_cell = tf.contrib.rnn.DropoutWrapper(enc_cell, output_keep_prob=0.5)
+    enc_cell = tf.nn.rnn_cell.BasicRNNCell(n_hidden)
+    enc_cell = tf.nn.rnn_cell.DropoutWrapper(enc_cell, output_keep_prob=0.5)
 
     outputs, enc_states = tf.nn.dynamic_rnn(enc_cell, enc_input,
                                             dtype=tf.float32)
 
 # 디코더 셀을 구성한다.
 with tf.variable_scope('decode'):
-    dec_cell = tf.contrib.rnn.BasicRNNCell(n_hidden)
-    dec_cell = tf.contrib.rnn.DropoutWrapper(dec_cell, output_keep_prob=0.5)
+    dec_cell = tf.nn.rnn_cell.BasicRNNCell(n_hidden)
+    dec_cell = tf.nn.rnn_cell.DropoutWrapper(dec_cell, output_keep_prob=0.5)
 
     # Seq2Seq 모델은 인코더 셀의 최종 상태값을
     # 디코더 셀의 초기 상태값으로 넣어주는 것이 핵심.

@@ -14,7 +14,7 @@
 
 ## 요구사항
 
-- TensorFlow > 1.0
+- TensorFlow 1.2
 - Python 3.6
     - numpy 1.12
     - matplotlib 2.0
