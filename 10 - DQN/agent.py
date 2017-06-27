@@ -113,7 +113,7 @@ def replay():
     sess = tf.Session()
 
     game = Game(SCREEN_WIDTH, SCREEN_HEIGHT, show_game=True)
-    brain = DQN(sess, SCREEN_WIDTH, SCREEN_HEIGHT, NUN_ACTION)
+    brain = DQN(sess, SCREEN_WIDTH, SCREEN_HEIGHT, NUM_ACTION)
 
     saver = tf.train.Saver()
     ckpt = tf.train.get_checkpoint_state('model')
