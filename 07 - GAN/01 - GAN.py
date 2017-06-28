@@ -74,6 +74,8 @@ D_gene = discriminator(G)
 D_real = discriminator(X)
 
 # 논문에 따르면, GAN 모델의 최적화는 loss_G 와 loss_D 를 최대화 하는 것 입니다.
+# 다만 loss_D와 loss_G는 서로 연관관계가 있기 때문에 두 개의 손실값이 항상 같이 증가하는 경향을 보이지는 않을 것 입니다.
+# loss_D가 증가하려면 loss_G는 하락해야하고, loss_G가 증가하려면 loss_D는 하락해야하는 경쟁관계에 있기 때문입니다.
 # 논문의 수식에 따른 다음 로직을 보면 loss_D 를 최대화하기 위해서는 D_gene 값을 최소화하게 됩니다.
 # 판별기에 진짜 이미지를 넣었을 때에도 최대값을 : tf.log(D_real)
 # 가짜 이미지를 넣었을 때에도 최대값을 : tf.log(1 - D_gene)
