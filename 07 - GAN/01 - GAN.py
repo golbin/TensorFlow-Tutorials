@@ -88,8 +88,8 @@ loss_D = tf.reduce_mean(tf.log(D_real) + tf.log(1 - D_gene))
 # 결국 D_gene 값을 최대화하는 것이므로 다음과 같이 사용할 수 있습니다.
 loss_G = tf.reduce_mean(tf.log(D_gene))
 
-# loss_D 를 구할 때는 생성기 신경망에 사용되는 변수만 사용하고,
-# loss_G 를 구할 때는 판별기 신경망에 사용되는 변수만 사용하여 최적화를 합니다.
+# loss_D 를 구할 때는 판별기 신경망에 사용되는 변수만 사용하고,
+# loss_G 를 구할 때는 생성기 신경망에 사용되는 변수만 사용하여 최적화를 합니다.
 D_var_list = [D_W1, D_b1, D_W2, D_b2]
 G_var_list = [G_W1, G_b1, G_W2, G_b2]
 
