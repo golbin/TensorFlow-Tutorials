@@ -45,7 +45,7 @@ sess.run(init)
 batch_size = 100
 total_batch = int(mnist.train.num_examples / batch_size)
 
-for epoch in range(30):
+for epoch in range(15):
     total_cost = 0
 
     for i in range(total_batch):
