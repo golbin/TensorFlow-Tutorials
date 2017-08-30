@@ -73,6 +73,6 @@ target = tf.argmax(Y, 1)
 print('예측값:', sess.run(prediction, feed_dict={X: x_data}))
 print('실제값:', sess.run(target, feed_dict={Y: y_data}))
 
-check_prediction = tf.equal(prediction, target)
-accuracy = tf.reduce_mean(tf.cast(check_prediction, tf.float32))
+is_correct = tf.equal(prediction, target)
+accuracy = tf.reduce_mean(tf.cast(is_correct, tf.float32))
 print('정확도: %.2f' % sess.run(accuracy * 100, feed_dict={X: x_data, Y: y_data}))
