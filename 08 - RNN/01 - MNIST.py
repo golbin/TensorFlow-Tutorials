@@ -8,7 +8,7 @@ mnist = input_data.read_data_sets("./mnist/data/", one_hot=True)
 # 옵션 설정
 ######
 learning_rate = 0.001
-total_epoch = 10
+total_epoch = 30
 batch_size = 128
 
 # RNN 은 순서가 있는 자료를 다루므로,
