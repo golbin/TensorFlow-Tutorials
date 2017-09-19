@@ -36,7 +36,7 @@ C:\> pip3 install numpy matplotlib pillow
 * https://www.tensorflow.org/install
 
 ### 2.2 텐서플로 예제 내려받고 실행해보기
-이 책의 모든 예제는 깃허브 저장소 https://github.com/golbin/TensorFlow-Tutorials에 올려뒀습니다. 다음의 git 명령어로 소스코드 전체를 내려받거나, 압축 파일을 내려받아 적당한 위치에 풀어둡니다.
+이 책의 모든 예제는 깃허브 저장소 https://github.com/golbin/TensorFlow-Tutorials 에 올려뒀습니다. 다음의 git 명령어로 소스코드 전체를 내려받거나, 압축 파일을 내려받아 적당한 위치에 풀어둡니다.
 
 ```
 C:\> git clone https://github.com/golbin/TensorFlow-Tutorials.git
