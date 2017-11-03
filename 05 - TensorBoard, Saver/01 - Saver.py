@@ -3,6 +3,8 @@
 import tensorflow as tf
 import numpy as np
 
+# Jupyter에서 실행 시 기존의 graph가 남아 있어 발생하는 오류를 방지한다.
+tf.reset_default_graph() 
 
 data = np.loadtxt('./data.csv', delimiter=',',
                   unpack=True, dtype='float32')
@@ -48,7 +50,7 @@ sess = tf.Session()
 # global_variables 함수를 통해 앞서 정의하였던 변수들을 저장하거나 불러올 변수들로 설정합니다.
 saver = tf.train.Saver(tf.global_variables())
 
-ckpt = tf.train.get_checkpoint_state('./model')
+ckpt = tf.train.get_checkpoint_state('./model1')
 if ckpt and tf.train.checkpoint_exists(ckpt.model_checkpoint_path):
     saver.restore(sess, ckpt.model_checkpoint_path)
 else:
@@ -62,7 +64,7 @@ for step in range(2):
           'Cost: %.3f' % sess.run(cost, feed_dict={X: x_data, Y: y_data}))
 
 # 최적화가 끝난 뒤, 변수를 저장합니다.
-saver.save(sess, './model/dnn.ckpt', global_step=global_step)
+saver.save(sess, './model1/dnn.ckpt', global_step=global_step)
 
 #########
 # 결과 확인

@@ -50,7 +50,7 @@ with tf.name_scope('optimizer'):
 sess = tf.Session()
 saver = tf.train.Saver(tf.global_variables())
 
-ckpt = tf.train.get_checkpoint_state('./model')
+ckpt = tf.train.get_checkpoint_state('./model3')
 if ckpt and tf.train.checkpoint_exists(ckpt.model_checkpoint_path):
     saver.restore(sess, ckpt.model_checkpoint_path)
 else:
@@ -68,7 +68,7 @@ for step in range(100):
     summary = sess.run(merged, feed_dict={X: x_data, Y: y_data})
     writer.add_summary(summary, global_step=sess.run(global_step))
 
-saver.save(sess, './model/dnn.ckpt', global_step=global_step)
+saver.save(sess, './model3/dnn.ckpt', global_step=global_step)
 
 #########
 # 결과 확인
