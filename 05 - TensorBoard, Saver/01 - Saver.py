@@ -3,6 +3,8 @@
 import tensorflow as tf
 import numpy as np
 
+# Jupyter에서 실행 시 기존의 graph가 남아 있어 발생하는 오류를 방지한다.
+tf.reset_default_graph() 
 
 data = np.loadtxt('./data.csv', delimiter=',',
                   unpack=True, dtype='float32')
