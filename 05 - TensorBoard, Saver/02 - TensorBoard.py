@@ -32,6 +32,8 @@ with tf.name_scope('output'):
     W3 = tf.Variable(tf.random_uniform([20, 3], -1., 1.), name='W3')
     model = tf.matmul(L2, W3)
 
+    tf.summary.histogram("Model", model)
+
 with tf.name_scope('optimizer'):
     cost = tf.reduce_mean(
         tf.nn.softmax_cross_entropy_with_logits(labels=Y, logits=model))
