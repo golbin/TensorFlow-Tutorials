@@ -14,11 +14,11 @@
 
 ## 요구사항
 
-- TensorFlow 1.2
-- Python 3.6
-    - numpy 1.12
-    - matplotlib 2.0
-    - pillow 4.1
+- TensorFlow >= 1.2
+- Python >= 3.6
+    - numpy >= 1.12
+    - matplotlib >= 2.0
+    - pillow >= 4.1
 
 ※ ChatBot은 수정/확인 중 입니다.
 
@@ -160,3 +160,8 @@ _하정우, 네이버 클로바 AI연구팀장_
 
 - [모두를 위한 머신러닝/딥러닝 강의](https://www.youtube.com/watch?v=BS6O0zOGX4E&list=PLlMkM4tgfjnLSOjrEJN31gZATbcj_MpUm) (홍콩 과기대 김성훈 교수님 강좌)
 - [강좌 실습 코드](https://github.com/golbin/TensorFlow-ML-Exercises) (내가 만듬)
+
+## Troubleshooting
+
+- Mac OS에서 matplotlib를 사용하는 코드가 실행이 안되거나 에러가 나는 경우
+  - `~/.matplotlib/matplotlibrc` 파일을 생성하고 `backend: TkAgg` 라는 설정을 추가해 주시면 됩니다.
