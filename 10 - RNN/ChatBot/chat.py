@@ -26,14 +26,14 @@ class ChatBot:
         line = sys.stdin.readline()
 
         while line:
-            print(self.get_replay(line.strip()))
+            print(self._get_replay(line.strip()))
 
             sys.stdout.write("\n> ")
             sys.stdout.flush()
 
             line = sys.stdin.readline()
 
-    def decode(self, enc_input, dec_input):
+    def _decode(self, enc_input, dec_input):
         if type(dec_input) is np.ndarray:
             dec_input = dec_input.tolist()
 
@@ -46,7 +46,7 @@ class ChatBot:
 
         return self.model.predict(self.sess, [enc_input], [dec_input])
 
-    def get_replay(self, msg):
+    def _get_replay(self, msg):
         enc_input = self.dialog.tokenizer(msg)
         enc_input = self.dialog.tokens_to_ids(enc_input)
         dec_input = []
@@ -57,7 +57,7 @@ class ChatBot:
         #       다만 상황에 따라서는 이런 방식이 더 유연할 수도 있을 듯
         curr_seq = 0
         for i in range(FLAGS.max_decode_len):
-            outputs = self.decode(enc_input, dec_input)
+            outputs = self._decode(enc_input, dec_input)
             if self.dialog.is_eos(outputs[0][curr_seq]):
                 break
             elif self.dialog.is_defined(outputs[0][curr_seq]) is not True:
@@ -74,6 +74,7 @@ def main(_):
 
     chatbot = ChatBot(FLAGS.voc_path, FLAGS.train_dir)
     chatbot.run()
+
 
 if __name__ == "__main__":
     tf.app.run()

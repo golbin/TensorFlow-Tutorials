@@ -2,7 +2,6 @@
 import tensorflow as tf
 import numpy as np
 import re
-import codecs
 
 from config import FLAGS
 
@@ -32,11 +31,11 @@ class Dialog():
         tokens = [[self.vocab_list[i] for i in dec] for dec in indices]
 
         if string:
-            return self.decode_to_string(tokens[0])
+            return self._decode_to_string(tokens[0])
         else:
             return tokens
 
-    def decode_to_string(self, tokens):
+    def _decode_to_string(self, tokens):
         text = ' '.join(tokens)
         return text.strip()
 
@@ -50,7 +49,7 @@ class Dialog():
     def is_defined(self, voc_id):
         return voc_id in self._PRE_DEFINED_
 
-    def max_len(self, batch_set):
+    def _max_len(self, batch_set):
         max_len_input = 0
         max_len_output = 0
 
@@ -64,7 +63,7 @@ class Dialog():
 
         return max_len_input, max_len_output + 1
 
-    def pad(self, seq, max_len, start=None, eos=None):
+    def _pad(self, seq, max_len, start=None, eos=None):
         if start:
             padded_seq = [self._STA_ID_] + seq
         elif eos:
@@ -77,16 +76,16 @@ class Dialog():
         else:
             return padded_seq
 
-    def pad_left(self, seq, max_len):
+    def _pad_left(self, seq, max_len):
         if len(seq) < max_len:
             return ([self._PAD_ID_] * (max_len - len(seq))) + seq
         else:
             return seq
 
     def transform(self, input, output, input_max, output_max):
-        enc_input = self.pad(input, input_max)
-        dec_input = self.pad(output, output_max, start=True)
-        target = self.pad(output, output_max, eos=True)
+        enc_input = self._pad(input, input_max)
+        dec_input = self._pad(output, output_max, start=True)
+        target = self._pad(output, output_max, eos=True)
 
         # 구글 방식으로 입력을 인코더에 역순으로 입력한다.
         enc_input.reverse()
@@ -117,7 +116,7 @@ class Dialog():
 
         # TODO: 구글처럼 버킷을 이용한 방식으로 변경
         # 간단하게 만들기 위해 구글처럼 버킷을 쓰지 않고 같은 배치는 같은 사이즈를 사용하도록 만듬
-        max_len_input, max_len_output = self.max_len(batch_set)
+        max_len_input, max_len_output = self._max_len(batch_set)
 
         for i in range(0, len(batch_set) - 1, 2):
             enc, dec, tar = self.transform(batch_set[i], batch_set[i+1],

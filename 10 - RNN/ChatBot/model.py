@@ -25,15 +25,15 @@ class Seq2Seq:
         self.bias = tf.Variable(tf.zeros([self.vocab_size]), name="bias")
         self.global_step = tf.Variable(0, trainable=False, name="global_step")
 
-        self.build_model()
+        self._build_model()
 
         self.saver = tf.train.Saver(tf.global_variables())
 
-    def build_model(self):
-        self.enc_input = tf.transpose(self.enc_input, [1, 0, 2])
-        self.dec_input = tf.transpose(self.dec_input, [1, 0, 2])
+    def _build_model(self):
+        # self.enc_input = tf.transpose(self.enc_input, [1, 0, 2])
+        # self.dec_input = tf.transpose(self.dec_input, [1, 0, 2])
 
-        enc_cell, dec_cell = self.build_cells()
+        enc_cell, dec_cell = self._build_cells()
 
         with tf.variable_scope('encode'):
             outputs, enc_states = tf.nn.dynamic_rnn(enc_cell, self.enc_input, dtype=tf.float32)
@@ -42,24 +42,24 @@ class Seq2Seq:
             outputs, dec_states = tf.nn.dynamic_rnn(dec_cell, self.dec_input, dtype=tf.float32,
                                                     initial_state=enc_states)
 
-        self.logits, self.cost, self.train_op = self.build_ops(outputs, self.targets)
+        self.logits, self.cost, self.train_op = self._build_ops(outputs, self.targets)
 
         self.outputs = tf.argmax(self.logits, 2)
 
-    def cell(self, n_hidden, output_keep_prob):
-        rnn_cell = tf.contrib.rnn.BasicRNNCell(self.n_hidden)
-        rnn_cell = tf.contrib.rnn.DropoutWrapper(rnn_cell, output_keep_prob=output_keep_prob)
+    def _cell(self, output_keep_prob):
+        rnn_cell = tf.nn.rnn_cell.BasicLSTMCell(self.n_hidden)
+        rnn_cell = tf.nn.rnn_cell.DropoutWrapper(rnn_cell, output_keep_prob=output_keep_prob)
         return rnn_cell
 
-    def build_cells(self, output_keep_prob=0.5):
-        enc_cell = tf.contrib.rnn.MultiRNNCell([self.cell(self.n_hidden, output_keep_prob)
+    def _build_cells(self, output_keep_prob=0.5):
+        enc_cell = tf.nn.rnn_cell.MultiRNNCell([self._cell(output_keep_prob)
                                                 for _ in range(self.n_layers)])
-        dec_cell = tf.contrib.rnn.MultiRNNCell([self.cell(self.n_hidden, output_keep_prob)
+        dec_cell = tf.nn.rnn_cell.MultiRNNCell([self._cell(output_keep_prob)
                                                 for _ in range(self.n_layers)])
 
         return enc_cell, dec_cell
 
-    def build_ops(self, outputs, targets):
+    def _build_ops(self, outputs, targets):
         time_steps = tf.shape(outputs)[1]
         outputs = tf.reshape(outputs, [-1, self.n_hidden])
 
