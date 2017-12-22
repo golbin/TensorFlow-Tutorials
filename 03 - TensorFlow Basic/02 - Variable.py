@@ -19,20 +19,18 @@ b = tf.Variable(tf.random_normal([2, 1]))
 # tf.matmul 처럼 mat* 로 되어 있는 함수로 행렬 계산을 수행합니다.
 expr = tf.matmul(X, W) + b
 
-sess = tf.Session()
-# 위에서 설정한 Variable 들의 값들을 초기화 하기 위해
-# 처음에 tf.global_variables_initializer 를 한 번 실행해야 합니다.
-sess.run(tf.global_variables_initializer())
+with tf.Session() as sess:
+    # 위에서 설정한 Variable 들의 값들을 초기화 하기 위해
+    # 처음에 tf.global_variables_initializer 를 한 번 실행해야 합니다.
+    sess.run(tf.global_variables_initializer())
 
-print("=== x_data ===")
-print(x_data)
-print("=== W ===")
-print(sess.run(W))
-print("=== b ===")
-print(sess.run(b))
-print("=== expr ===")
-# expr 수식에는 X 라는 입력값이 필요합니다.
-# 따라서 expr 실행시에는 이 변수에 대한 실제 입력값을 다음처럼 넣어줘야합니다.
-print(sess.run(expr, feed_dict={X: x_data}))
-
-sess.close()
+    print("=== x_data ===")
+    print(x_data)
+    print("=== W ===")
+    print(sess.run(W))
+    print("=== b ===")
+    print(sess.run(b))
+    print("=== expr ===")
+    # expr 수식에는 X 라는 입력값이 필요합니다.
+    # 따라서 expr 실행시에는 이 변수에 대한 실제 입력값을 다음처럼 넣어줘야합니다.
+    print(sess.run(expr, feed_dict={X: x_data}))
