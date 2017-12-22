@@ -13,7 +13,7 @@ x_data = [[1, 2, 3], [4, 5, 6]]
 # tf.Variable: 그래프를 계산하면서 최적화 할 변수들입니다. 이 값이 바로 신경망을 좌우하는 값들입니다.
 # tf.random_normal: 각 변수들의 초기값을 정규분포 랜덤 값으로 초기화합니다.
 W = tf.Variable(tf.random_normal([3, 2]))
-b = tf.Variable(tf.random_normal([2, 1]))
+b = tf.Variable(tf.random_normal([1, 2]))
 
 # 입력값과 변수들을 계산할 수식을 작성합니다.
 # tf.matmul 처럼 mat* 로 되어 있는 함수로 행렬 계산을 수행합니다.
