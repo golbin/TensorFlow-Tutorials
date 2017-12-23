@@ -20,8 +20,8 @@ y_data = np.array([
 #########
 # 신경망 모델 구성
 ######
-X = tf.placeholder(tf.float32)
-Y = tf.placeholder(tf.float32)
+X = tf.placeholder(tf.float32, [None, 2])
+Y = tf.placeholder(tf.float32, [None, 3])
 
 # 첫번째 가중치의 차원은 [특성, 히든 레이어의 뉴런갯수] -> [2, 10] 으로 정합니다.
 W1 = tf.Variable(tf.random_uniform([2, 10], -1., 1.))
@@ -75,4 +75,4 @@ print('실제값:', sess.run(target, feed_dict={Y: y_data}))
 
 is_correct = tf.equal(prediction, target)
 accuracy = tf.reduce_mean(tf.cast(is_correct, tf.float32))
-print('정확도: %.2f' % sess.run(accuracy * 100, feed_dict={X: x_data, Y: y_data}))
+print('정확도: {:.2f}'.format(sess.run(accuracy * 100, feed_dict={X: x_data, Y: y_data})))
