@@ -27,13 +27,13 @@ sentences = ["나 고양이 좋다",
              "강아지 고양이 좋다"]
 
 # 문장을 전부 합친 후 공백으로 단어들을 나누고 고유한 단어들로 리스트를 만듭니다.
+word_sequence = " ".join(sentences).split()
 word_list = " ".join(sentences).split()
 word_list = list(set(word_list))
 # 문자열로 분석하는 것 보다, 숫자로 분석하는 것이 훨씬 용이하므로
 # 리스트에서 문자들의 인덱스를 뽑아서 사용하기 위해,
 # 이를 표현하기 위한 연관 배열과, 단어 리스트에서 단어를 참조 할 수 있는 인덱스 배열을 만듭합니다.
 word_dict = {w: i for i, w in enumerate(word_list)}
-word_index = [word_dict[word] for word in word_list]
 
 # 윈도우 사이즈를 1 로 하는 skip-gram 모델을 만듭니다.
 # 예) 나 게임 만화 애니 좋다
@@ -41,10 +41,11 @@ word_index = [word_dict[word] for word in word_list]
 #   -> (게임, 나), (게임, 만화), (만화, 게임), (만화, 애니), (애니, 만화), (애니, 좋다)
 skip_grams = []
 
-for i in range(1, len(word_index) - 1):
+for i in range(1, len(word_sequence) - 1):
     # (context, target) : ([target index - 1, target index + 1], target)
-    target = word_index[i]
-    context = [word_index[i - 1], word_index[i + 1]]
+    # 스킵그램을 만든 후, 저장은 단어의 고유 번호(index)로 저장합니다
+    target = word_dict[word_sequence[i]]
+    context = [word_dict[word_sequence[i - 1]], word_dict[word_sequence[i + 1]]]
 
     # (target, context[0]), (target, context[1])..
     for w in context:
