@@ -18,11 +18,11 @@ is_training = tf.placeholder(tf.bool)
 # 활성화 함수 적용은 물론, 컨볼루션 신경망을 만들기 위한 나머지 수치들은 알아서 계산해줍니다.
 # 특히 Weights 를 계산하는데 xavier_initializer 를 쓰고 있는 등,
 # 크게 신경쓰지 않아도 일반적으로 효율적인 신경망을 만들어줍니다.
-L1 = tf.layers.conv2d(X, 32, [3, 3])
+L1 = tf.layers.conv2d(X, 32, [3, 3], activation=tf.nn.relu)
 L1 = tf.layers.max_pooling2d(L1, [2, 2], [2, 2])
 L1 = tf.layers.dropout(L1, 0.7, is_training)
 
-L2 = tf.layers.conv2d(L1, 64, [3, 3])
+L2 = tf.layers.conv2d(L1, 64, [3, 3], activation=tf.nn.relu)
 L2 = tf.layers.max_pooling2d(L2, [2, 2], [2, 2])
 L2 = tf.layers.dropout(L2, 0.7, is_training)
 
