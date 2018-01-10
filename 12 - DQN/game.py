@@ -73,7 +73,7 @@ class Game:
                         self.current_reward,
                         self.total_game)
 
-        self.axis.clear()
+        # self.axis.clear()
         self.axis.set_title(title, fontsize=12)
 
         road = patches.Rectangle((self.road_left - 1, 0),
