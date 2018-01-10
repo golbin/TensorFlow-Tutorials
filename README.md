@@ -20,8 +20,6 @@
     - matplotlib >= 2.0
     - pillow >= 4.1
 
-※ ChatBot은 수정/확인 중 입니다.
-
 ## 골빈해커의 3분 딥러닝
 
 ![책표지](book_cover.jpg)
