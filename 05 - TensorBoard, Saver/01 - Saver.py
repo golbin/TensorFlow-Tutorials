@@ -33,7 +33,7 @@ W3 = tf.Variable(tf.random_uniform([20, 3], -1., 1.))
 model = tf.matmul(L2, W3)
 
 cost = tf.reduce_mean(
-    tf.nn.softmax_cross_entropy_with_logits(labels=Y, logits=model))
+    tf.nn.softmax_cross_entropy_with_logits_v2(labels=Y, logits=model))
 
 optimizer = tf.train.AdamOptimizer(learning_rate=0.01)
 # global_step로 넘겨준 변수를, 학습용 변수들을 최적화 할 때 마다 학습 횟수를 하나씩 증가시킵니다.

@@ -37,7 +37,7 @@ with tf.name_scope('output'):
 
 with tf.name_scope('optimizer'):
     cost = tf.reduce_mean(
-        tf.nn.softmax_cross_entropy_with_logits(labels=Y, logits=model))
+        tf.nn.softmax_cross_entropy_with_logits_v2(labels=Y, logits=model))
 
     optimizer = tf.train.AdamOptimizer(learning_rate=0.01)
     train_op = optimizer.minimize(cost, global_step=global_step)

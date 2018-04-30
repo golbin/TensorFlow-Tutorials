@@ -48,7 +48,7 @@ L3 = tf.nn.dropout(L3, keep_prob)
 W4 = tf.Variable(tf.random_normal([256, 10], stddev=0.01))
 model = tf.matmul(L3, W4)
 
-cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=model, labels=Y))
+cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=model, labels=Y))
 optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
 # 최적화 함수를 RMSPropOptimizer 로 바꿔서 결과를 확인해봅시다.
 # optimizer = tf.train.RMSPropOptimizer(0.001, 0.9).minimize(cost)

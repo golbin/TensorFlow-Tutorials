@@ -26,7 +26,7 @@ L2 = tf.nn.dropout(L2, keep_prob)
 W3 = tf.Variable(tf.random_normal([256, 10], stddev=0.01))
 model = tf.matmul(L2, W3)
 
-cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=model, labels=Y))
+cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=model, labels=Y))
 optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
 
 #########

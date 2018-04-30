@@ -14,11 +14,11 @@
 
 ## 요구사항
 
-- TensorFlow >= 1.2
-- Python >= 3.6
-    - numpy >= 1.12
-    - matplotlib >= 2.0
-    - pillow >= 4.1
+- TensorFlow >= 1.8.0
+- Python >= 3.6.1
+    - numpy >= 1.14.3
+    - matplotlib >= 2.2.2
+    - pillow >= 5.1
 
 ## 골빈해커의 3분 딥러닝
 

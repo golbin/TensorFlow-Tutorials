@@ -54,7 +54,7 @@ outputs = tf.transpose(outputs, [1, 0, 2])
 outputs = outputs[-1]
 model = tf.matmul(outputs, W) + b
 
-cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=model, labels=Y))
+cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=model, labels=Y))
 optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cost)
 
 #########
