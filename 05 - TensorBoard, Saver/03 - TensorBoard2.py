@@ -1,6 +1,8 @@
 import tensorflow as tf
 import numpy as np
 
+tf.reset_default_graph()
+
 data = np.loadtxt('./data.csv', delimiter=',',
                   unpack=True, dtype='float32')
 
