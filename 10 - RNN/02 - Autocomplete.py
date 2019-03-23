@@ -70,13 +70,16 @@ X = tf.placeholder(tf.float32, [None, n_step, n_input])
 # 기존처럼 one-hot 인코딩을 사용한다면 입력값의 형태는 [None, n_class] 여야합니다.
 Y = tf.placeholder(tf.int32, [None])
 
+# dropout prob for RNN
+keep_prob = tf.placeholder(tf.float32, [])
+
 W = tf.Variable(tf.random_normal([n_hidden, n_class]))
 b = tf.Variable(tf.random_normal([n_class]))
 
 # RNN 셀을 생성합니다.
 cell1 = tf.nn.rnn_cell.BasicLSTMCell(n_hidden)
 # 과적합 방지를 위한 Dropout 기법을 사용합니다.
-cell1 = tf.nn.rnn_cell.DropoutWrapper(cell1, output_keep_prob=0.5)
+cell1 = tf.nn.rnn_cell.DropoutWrapper(cell1, output_keep_prob=keep_prob)
 # 여러개의 셀을 조합해서 사용하기 위해 셀을 추가로 생성합니다.
 cell2 = tf.nn.rnn_cell.BasicLSTMCell(n_hidden)
 
@@ -108,7 +111,9 @@ input_batch, target_batch = make_batch(seq_data)
 
 for epoch in range(total_epoch):
     _, loss = sess.run([optimizer, cost],
-                       feed_dict={X: input_batch, Y: target_batch})
+                       feed_dict={X: input_batch, 
+                                  Y: target_batch,
+                                  keep_prob: 0.5})
 
     print('Epoch:', '%04d' % (epoch + 1),
           'cost =', '{:.6f}'.format(loss))
@@ -127,7 +132,9 @@ accuracy = tf.reduce_mean(tf.cast(prediction_check, tf.float32))
 input_batch, target_batch = make_batch(seq_data)
 
 predict, accuracy_val = sess.run([prediction, accuracy],
-                                 feed_dict={X: input_batch, Y: target_batch})
+                                 feed_dict={X: input_batch, 
+                                            Y: target_batch,
+                                            keep_prob:1})
 
 predict_words = []
 for idx, val in enumerate(seq_data):
